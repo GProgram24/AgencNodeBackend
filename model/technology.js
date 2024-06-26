@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
 
-const technologySchema = new Schema({
+const technologySchema = new mongoose.Schema({
     id: { type: Number, required: true, unique: true },
     name: { type: String, required: true },
     userId: { type: Number, required: true },
@@ -9,4 +8,4 @@ const technologySchema = new Schema({
     createdBy: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('Technology', technologySchema);
+export default mongoose.model('Technology', technologySchema);

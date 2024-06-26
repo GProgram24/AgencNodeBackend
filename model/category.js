@@ -1,7 +1,6 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
 
-const categorySchema = new Schema({
+const categorySchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   sub_brand_id: { type: Number, required: true },
   name: { type: String, required: true },
@@ -12,4 +11,4 @@ const categorySchema = new Schema({
   created_by: { type: Number, required: true },
 });
 
-module.exports = mongoose.model("Category", categorySchema);
+export default mongoose.model("Category", categorySchema);

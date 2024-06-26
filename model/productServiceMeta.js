@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const productServiceMetaSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
@@ -12,4 +12,4 @@ const productServiceMetaSchema = new mongoose.Schema({
   createdBy: { type: Number, required: true },
 });
 
-module.exports = mongoose.model("ProductServiceMeta", productServiceMetaSchema);
+export default mongoose.model("ProductServiceMeta", productServiceMetaSchema);

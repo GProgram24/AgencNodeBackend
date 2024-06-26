@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const targetAudienceSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
@@ -12,4 +12,4 @@ const targetAudienceSchema = new mongoose.Schema({
   createdBy: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('TargetGroup', targetAudienceSchema);
+export default mongoose.model('TargetAudience', targetAudienceSchema);

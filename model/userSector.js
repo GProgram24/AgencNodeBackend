@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
 
-const userSectorSchema = new Schema({
+const userSectorSchema = new mongoose.Schema({
     id: { type: Number, required: true, unique: true },
     technologyId: { type: Number, required: true },
     sectorId: { type: Number, required: true },
@@ -11,4 +10,4 @@ const userSectorSchema = new Schema({
     createdBy: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('UserSector', userSectorSchema);
+export default mongoose.model('UserSector', userSectorSchema);

@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
 
-const subBrandSchema = new Schema({
+const subBrandSchema = new mongoose.Schema({
     id: { type: Number, required: true, unique: true },
     brandId: { type: Number, required: true },
     name: { type: String, required: true },
@@ -10,4 +9,4 @@ const subBrandSchema = new Schema({
     createdBy: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('SubBrand', subBrandSchema);
+export default mongoose.model('SubBrand', subBrandSchema);

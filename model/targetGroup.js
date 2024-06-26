@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const targetGroupSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
@@ -6,4 +6,4 @@ const targetGroupSchema = new mongoose.Schema({
   userId: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('TargetGroup', targetGroupSchema);
+export default mongoose.model('TargetGroup', targetGroupSchema);

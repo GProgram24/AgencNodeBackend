@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
 
-const quarterSchema = new Schema({
+const quarterSchema = new mongoose.Schema({
     id: { type: Number, required: true, unique: true },
     name: { type: String, required: true },
     userId: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('QuarterGoal', quarterSchema);
+export default mongoose.model('Quarter', quarterSchema);
+
