@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const productServiceMetaSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
@@ -9,7 +9,7 @@ const productServiceMetaSchema = new mongoose.Schema({
   usp: { type: String, required: true },
   userId: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now },
-  createdBy: { type: Number, required: true }
+  createdBy: { type: Number, required: true },
 });
 
-module.exports = mongoose.model('ProductServiceMeta', productServiceMetaSchema);
+module.exports = mongoose.model("ProductServiceMeta", productServiceMetaSchema);
