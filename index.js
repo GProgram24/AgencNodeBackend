@@ -19,6 +19,7 @@ import userSectorRoutes from './router/userSectorRoute.js';
 import technologyRoutes from './router/technologyRoute.js';
 import sectorRoutes from './router/sectorRoute.js';
 import quarterRoutes from './router/quarterRoute.js'; 
+import login from "./router/login.js";
 
 dotenv.config();
 
@@ -33,6 +34,8 @@ app.use(logger('dev'));
 app.get('/', (req, res)=>{
   res.json("working");
 })
+
+app.use('/login', login);
 app.use('/product-services', productServiceRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/sub-brands', subBrandRoutes);
