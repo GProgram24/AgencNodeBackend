@@ -62,7 +62,7 @@ app.get("/", (req, res) => {
 app.use("/login", login);
 app.use("/signup", signup);
 app.use("/forgot-password", forgotPassword);
-app.use("/password-reset", passwordReset);
+app.use("/reset-password", passwordReset);
 app.use("/product-services", productServiceRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/sub-brands", subBrandRoutes);

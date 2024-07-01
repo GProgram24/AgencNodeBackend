@@ -1,5 +1,5 @@
 import express from 'express';
-import TargetAudience from '../model/targetAudience.js';
+import TargetAudience from '../model/targetAudience.model.js';
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import Quarter from '../model/quarter.js';
+import Quarter from '../model/quarter.model.js';
 
 const router = express.Router();
 

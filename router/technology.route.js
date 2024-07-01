@@ -1,5 +1,5 @@
 import express from 'express';
-import Technology from '../model/technology.js';
+import Technology from '../model/technology.model.js';
 
 const router = express.Router();
 

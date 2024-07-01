@@ -1,5 +1,5 @@
 import express from 'express';
-import CommunicationGoals from '../model/communicationGoals.js';
+import CommunicationGoals from '../model/communicationGoals.model.js';
 
 const router = express.Router();
 

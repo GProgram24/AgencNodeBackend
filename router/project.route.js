@@ -1,5 +1,5 @@
 import express from 'express';
-import Project from '../model/project.js';
+import Project from '../model/project.model.js';
 
 const router = express.Router();
 

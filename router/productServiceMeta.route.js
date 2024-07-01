@@ -1,5 +1,5 @@
 import express from 'express';
-import ProductServiceMeta from '../model/productServiceMeta.js';
+import ProductServiceMeta from '../model/productServiceMeta.model.js';
 
 const router = express.Router();
 
