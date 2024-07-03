@@ -24,6 +24,7 @@ import userSectorRoutes from "./router/userSector.route.js";
 import technologyRoutes from "./router/technology.route.js";
 import sectorRoutes from "./router/sector.route.js";
 import quarterRoutes from "./router/quarter.route.js";
+import savebrandRoute from "./router/BrandArchitecture/saveBrandArchitecture.route.js";
 
 dotenv.config();
 
@@ -57,7 +58,7 @@ app.use(logger("dev"));
 // To check server status
 app.get("/", (req, res) => {
   res.json({ status: "running" });
-})
+});
 
 app.use("/login", login);
 app.use("/signup", signup);
@@ -79,6 +80,8 @@ app.use("/technologies", technologyRoutes);
 app.use("/sectors", sectorRoutes);
 app.use("/quarters", quarterRoutes);
 
+app.use("/api/brand", savebrandRoute);
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
@@ -89,5 +92,3 @@ mongoose
     });
   })
   .catch((err) => console.log("Failed to connect to MongoDB", err));
-
-

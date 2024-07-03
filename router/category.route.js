@@ -1,18 +1,18 @@
-import express from 'express';
-import Category from '../model/category.model.js';
+import express from "express";
+import categoryModel from "../model/Brand/category.model.js";
 
 const router = express.Router();
 
 // Create one category
-router.post('/', async (req, res) => {
-    const category = new Category(req.body);
+router.post("/", async (req, res) => {
+  const category = new categoryModel(req.body);
 
-    try {
-        const newCategory = await category.save();
-        res.status(201).json(newCategory);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const newCategory = await category.save();
+    res.status(201).json(newCategory);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 export default router;
