@@ -9,6 +9,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 // Controller function for user login
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
+    console.log(req.body);
     try {
         // Find user based on email
         const user = await User.findOne({ email });
