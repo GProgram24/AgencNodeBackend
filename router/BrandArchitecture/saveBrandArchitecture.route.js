@@ -1,5 +1,5 @@
 import express from "express";
-import { saveBrandArchitecture } from "../../controller/BrandArchitecture/saveBrandArchiecture.controller.js";
+import { saveBrandArchitecture } from "../../controller/BrandArchitecture/saveBrandArchitecture.controller.js";
 
 const router = express.Router();
 
