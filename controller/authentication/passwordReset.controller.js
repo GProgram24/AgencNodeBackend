@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import User from "../../model/user.model.js";
-import Auth from "../../model/auth.model.js";
+import User from "../../model/User/user.model.js";
+import Auth from "../../model/User/auth.model.js";
 import { sendMail } from "../mailSender/mail.controller.js";
 
 // Send reset password link
