@@ -21,6 +21,4 @@ const custodianSchema = new mongoose.Schema({
 
   });
 
-const custodianModel = mongoose.model("custodian", custodianSchema);
-
-export default custodianModel;
+export default mongoose.model("custodian", custodianSchema);

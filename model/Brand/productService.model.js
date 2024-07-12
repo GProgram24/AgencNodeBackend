@@ -11,4 +11,4 @@ const productServiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("ProductService", productServiceSchema);
+export default mongoose.model("productService", productServiceSchema);

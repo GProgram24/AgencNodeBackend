@@ -26,6 +26,4 @@ const editorSchema = new mongoose.Schema({
 
   });
 
-const editorModel = mongoose.model("editor", editorSchema);
-
-export default editorModel;
+export default mongoose.model("editor", editorSchema);

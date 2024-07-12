@@ -8,10 +8,10 @@ const brandSchema = new mongoose.Schema(
     subCategories: [
       { type: mongoose.Schema.Types.ObjectId, ref: "SubCategory" },
     ],
-    managedBy: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "creators" },
+    managedBy: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "creators" },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: "ProductService" }],
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Brand", brandSchema);
+export default mongoose.model("brand", brandSchema);

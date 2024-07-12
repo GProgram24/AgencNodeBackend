@@ -26,6 +26,4 @@ const viewerSchema = new mongoose.Schema({
 
   });
 
-const viewerModel = mongoose.model("viewer", viewerSchema);
-
-export default viewerModel;
+export default mongoose.model("viewer", viewerSchema);

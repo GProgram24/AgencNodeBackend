@@ -6,25 +6,28 @@ import bodyParser from "body-parser";
 import logger from "morgan";
 
 import login from "./router/authentication/login.route.js";
-import signup from "./router/authentication/signup.route.js";
+// import signup from "./router/authentication/signup.route.js";
 import forgotPassword from "./router/authentication/forgotPassword.route.js";
 import passwordReset from "./router/authentication/passwordReset.route.js";
-import productServiceRoutes from "./router/productService.route.js";
-import categoryRoutes from "./router/category.route.js";
-import subBrandRoutes from "./router/subBrand.route.js";
-import brandRoutes from "./router/brand.route.js";
-import targetGroupRoutes from "./router/targetGroup.route.js";
-import projectRoutes from "./router/project.route.js";
-import userRoutes from "./router/user.route.js";
-import productServiceMetaRoutes from "./router/productServiceMeta.route.js";
-import targetAudienceRoutes from "./router/targetAudience.route.js";
-import communicationGoalsRoutes from "./router/communicationGoal.route.js";
-import userBrandRoutes from "./router/userBrand.route.js";
-import userSectorRoutes from "./router/userSector.route.js";
-import technologyRoutes from "./router/technology.route.js";
-import sectorRoutes from "./router/sector.route.js";
-import quarterRoutes from "./router/quarter.route.js";
-import savebrandRoute from "./router/BrandArchitecture/saveBrandArchitecture.route.js";
+import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
+import setCustodian from "./router/BrandArchitecture/setupCustodian.route.js";
+import getUser from "./router/checkUserExist.route.js";
+// import productServiceRoutes from "./router/productService.route.js";
+// import categoryRoutes from "./router/category.route.js";
+// import subBrandRoutes from "./router/subBrand.route.js";
+// import brandRoutes from "./router/brand.route.js";
+// import targetGroupRoutes from "./router/targetGroup.route.js";
+// import projectRoutes from "./router/project.route.js";
+// import userRoutes from "./router/user.route.js";
+// import productServiceMetaRoutes from "./router/productServiceMeta.route.js";
+// import targetAudienceRoutes from "./router/targetAudience.route.js";
+// import communicationGoalsRoutes from "./router/communicationGoal.route.js";
+// import userBrandRoutes from "./router/userBrand.route.js";
+// import userSectorRoutes from "./router/userSector.route.js";
+// import technologyRoutes from "./router/technology.route.js";
+// import sectorRoutes from "./router/sector.route.js";
+// import quarterRoutes from "./router/quarter.route.js";
+// import savebrandRoute from "./router/BrandArchitecture/saveBrandArchitecture.route.js";
 
 dotenv.config();
 
@@ -61,26 +64,29 @@ app.get("/", (req, res) => {
 });
 
 app.use("/login", login);
-app.use("/signup", signup);
+// app.use("/signup", signup);
 app.use("/forgot-password", forgotPassword);
 app.use("/reset-password", passwordReset);
-app.use("/product-services", productServiceRoutes);
-app.use("/categories", categoryRoutes);
-app.use("/sub-brands", subBrandRoutes);
-app.use("/brands", brandRoutes);
-app.use("/target-groups", targetGroupRoutes);
-app.use("/projects", projectRoutes);
-app.use("/users", userRoutes);
-app.use("/product-service-metas", productServiceMetaRoutes);
-app.use("/target-audiences", targetAudienceRoutes);
-app.use("/communication-goals", communicationGoalsRoutes);
-app.use("/user-brands", userBrandRoutes);
-app.use("/user-sectors", userSectorRoutes);
-app.use("/technologies", technologyRoutes);
-app.use("/sectors", sectorRoutes);
-app.use("/quarters", quarterRoutes);
+app.use("/assign-creator", setCreator);
+app.use("/assign-custodian", setCustodian);
+app.use("/get-user", getUser);
+// app.use("/product-services", productServiceRoutes);
+// app.use("/categories", categoryRoutes);
+// app.use("/sub-brands", subBrandRoutes);
+// app.use("/brands", brandRoutes);
+// app.use("/target-groups", targetGroupRoutes);
+// app.use("/projects", projectRoutes);
+// app.use("/users", userRoutes);
+// app.use("/product-service-metas", productServiceMetaRoutes);
+// app.use("/target-audiences", targetAudienceRoutes);
+// app.use("/communication-goals", communicationGoalsRoutes);
+// app.use("/user-brands", userBrandRoutes);
+// app.use("/user-sectors", userSectorRoutes);
+// app.use("/technologies", technologyRoutes);
+// app.use("/sectors", sectorRoutes);
+// app.use("/quarters", quarterRoutes);
 
-app.use("/api/brand", savebrandRoute);
+// app.use("/api/brand", savebrandRoute);
 
 // MongoDB Connection
 mongoose
