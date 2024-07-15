@@ -20,6 +20,11 @@ const viewerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "creators",
     required: true,
+  },
+  brandId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "brands",
+    required: true,
   }
 },
   {

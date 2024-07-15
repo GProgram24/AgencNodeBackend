@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const brandSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: { type: String, required: true, unique: true, trim: true },
     subBrands: [{ type: mongoose.Schema.Types.ObjectId, ref: "SubBrand" }],
     categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
     subCategories: [

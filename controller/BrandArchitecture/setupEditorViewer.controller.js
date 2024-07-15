@@ -1,13 +1,12 @@
 import bcrypt from "bcryptjs";
 import User from "../../model/User/user.model.js";
-import Creator from "../../model/User/creator.model.js";
-import Custodian from "../../model/User/custodian.model.js";
+import Editor from "../../model/User/editor.model.js";
+import Viewer from "../../model/User/viewer.model.js";
 import Brand from "../../model/Brand/brand.model.js";
 import { passwordGenerator } from "../authentication/passwordGenerator.controller.js";
 import axios from "axios";
-import Account from "../../model/Brand/account.model.js";
 
-export const setupCreator = async (req, res) => {
+const setupEditorViewer = async (req, res) => {
     const reqObj = req.body;
 
     if (!Array.isArray(reqObj) || reqObj.length === 0) {
@@ -17,7 +16,7 @@ export const setupCreator = async (req, res) => {
         // Respond with return as other operations need to be completed
         // checking email already exist is not required since its is already checked via /check route
         res.status(201).json({
-            message: 'Successful'
+            message: "Successful"
         });
 
         // Generate passwords for all users
@@ -37,23 +36,25 @@ export const setupCreator = async (req, res) => {
                 organisation: user.brand,
                 userType: user.userType.charAt(0).toUpperCase() + user.userType.slice(1),
                 name: user.name,
+                role: user.role,
                 password: user.password
             });
         }
 
-        // Fetch account id using custodian mail from user collection
-        const accountName = reqObj[0].account;
-        const accountIdResponse = await Account.findOne({ "name": accountName }).select("_id");
+        // Fetch account id and creator id using brand name from brand collection, since brand name is unique
+        const brandName = reqObj[0].brand;
+        const brandResponse = await Brand.findOne({ "name": brandName }).select(["managedBy","accountId"]);
+        console.log(brandResponse);
 
-        // Get custodian id from custodian collection for parentId field, using _id from account collection
-        const custodianIdResponse = await Custodian.findOne({"accountId":accountIdResponse._id}).select("_id");
 
-        // Add hashed passwords to request objects and prepare for insertion
+        // Add hashed passwords and accountId to request objects and prepare for insertion
         const usersWithHashedPasswords = await Promise.all(
             reqObj.map(async (user, index) => ({
                 ...user,
-                accountId: accountIdResponse._id,
-                password: await bcrypt.hash(passwords[index], 10)
+                password: await bcrypt.hash(passwords[index], 10),
+                parentId: brandResponse.managedBy,
+                accountId: brandResponse.accountId,
+                brandId: brandResponse._id
             }))
         );
 
@@ -61,27 +62,24 @@ export const setupCreator = async (req, res) => {
         const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
         console.log(createUsersResponse);
 
-        // Create object for creator collection
-        const creatorsObj = reqObj.map((user, index) => ({
-            name: user.name,
-            userId: createUsersResponse[index]._id,
-            parentId: custodianIdResponse._id
+        // Create object for editor/viewer collection
+        const editorViewerObj = usersWithHashedPasswords.map((user, index) => ({
+            ...user,
+            userId: createUsersResponse[index]._id
         }));
         // Insert in respective userType collection
-        const createUserTypeResponse = await Creator.insertMany(creatorsObj);
-        console.log(createUserTypeResponse);
+        if (reqObj[0].userType == "editor") {
+            const createUserTypeResponse = await Editor.insertMany(editorViewerObj);
+            console.log(createUserTypeResponse);
+        } else if (reqObj[0].userType == "viewer") {
+            const createUserTypeResponse = await Viewer.insertMany(editorViewerObj);
+            console.log(createUserTypeResponse);
+        }
 
-        // Create object for brand collection
-        const brandsObj = reqObj.map((user, index) => ({
-            name: user.brand,
-            managedBy: createUserTypeResponse[index]._id,
-            accountId: accountIdResponse.accountId
-        }));
-        // Insert in brand collection
-        const createBrandResponse = await Brand.insertMany(brandsObj);
-        console.log(createBrandResponse);
-
-    } catch (error) {
-        console.error("Error during creator setup: ", error);
+    } catch (err) {
+        console.log("Error during editor/viewer setup: " + err);
     }
-};
+
+}
+
+export default setupEditorViewer;
