@@ -23,21 +23,24 @@ export const loginUser = async (req, res) => {
 
         if (!isValidPassword) {
             return res.status(401).json({ message: "Invalid credentials" });
+        } else {
+            // if (user.userType == "viewer"){find the role of viewer, add it in response}
+            // else if(user.userType == "editor"){find the role of editor, add it in response}
+            
+            // User authenticated, generate token
+            const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
+
+            // Return the token
+            res.json({
+                token,
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    userType: user.userType,
+                },
+            });
         }
-
-        // User authenticated, generate token
-        const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
-
-        // Return the token
-        res.json({
-            token,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                userType: user.userType,
-            },
-        });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ message: "Internal Server Error" });

@@ -9,11 +9,13 @@ const custodianSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true,
+    unique: true
   },
   accountId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "accounts",
     required: true,
+    unique: true
   }
 },
   {

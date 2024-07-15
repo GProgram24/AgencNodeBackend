@@ -14,6 +14,7 @@ const editorSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true,
+    unique: true
   },
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
