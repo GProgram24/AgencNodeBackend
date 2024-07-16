@@ -11,13 +11,13 @@ const creatorSchema = new mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
     unique: true
   },
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "custodians",
+    ref: "Custodian",
     required: false,
   }
 },
@@ -26,4 +26,4 @@ const creatorSchema = new mongoose.Schema({
 
   });
 
-export default mongoose.model("creator", creatorSchema);
+export default mongoose.model("Creator", creatorSchema);

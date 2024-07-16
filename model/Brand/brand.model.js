@@ -8,9 +8,9 @@ const brandSchema = new mongoose.Schema(
     subCategories: [
       { type: mongoose.Schema.Types.ObjectId, ref: "SubCategory" },
     ],
-    managedBy: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "creators" },
-    accountId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "accounts" },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: "ProductService" }],
+    accountId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Account" },
+    managedBy: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "Creator" }
   },
   { timestamps: true }
 );

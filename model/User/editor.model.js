@@ -12,18 +12,18 @@ const editorSchema = new mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
     unique: true
   },
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "creators",
+    ref: "Creator",
     required: true,
   },
   brandId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "brands",
+    ref: "Brand",
     required: true,
   }
 },
@@ -32,4 +32,4 @@ const editorSchema = new mongoose.Schema({
 
   });
 
-export default mongoose.model("editor", editorSchema);
+export default mongoose.model("Editor", editorSchema);

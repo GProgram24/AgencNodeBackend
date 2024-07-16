@@ -8,4 +8,4 @@ const accountSchema = new mongoose.Schema({
         timestamps: true
     });
 
-export default mongoose.model("account", accountSchema);
+export default mongoose.model("Account", accountSchema);

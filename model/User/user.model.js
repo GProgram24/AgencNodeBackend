@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   accountId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "accounts",
+    ref: "Account",
     required: false,
   }
 },
@@ -26,4 +26,4 @@ const userSchema = new mongoose.Schema({
 
   });
 
-export default mongoose.model("user", userSchema);
+export default mongoose.model("User", userSchema);
