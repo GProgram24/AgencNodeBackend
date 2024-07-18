@@ -45,7 +45,7 @@ export const loginUser = async (req, res) => {
             let brandDetails = {};
             // Fetch brand details for creator
             if (user.userType == "creator") {
-                brandDetails = await Brand.findOne({ managedby: userDetails._id });
+                brandDetails = await Brand.findOne({ managedBy: userDetails._id });
             }
             else if (user.userType == "editor" || user.userType == "viewer") {
                 const creatorDetails = await Creator.findOne({ _id: userDetails.parentId });
