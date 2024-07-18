@@ -1,10 +1,22 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../../model/User/user.model.js";
+import Viewer from "../../model/User/viewer.model.js";
+import Editor from "../../model/User/editor.model.js";
+import Creator from "../../model/User/creator.model.js";
+import Custodian from "../../model/User/custodian.model.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
+
+// Mapping user types to their respective models
+const userTypeModels = {
+    viewer: Viewer,
+    editor: Editor,
+    creator: Creator,
+    custodian: Custodian,
+};
 
 // Controller function for user login
 export const loginUser = async (req, res) => {
@@ -24,25 +36,31 @@ export const loginUser = async (req, res) => {
         if (!isValidPassword) {
             return res.status(401).json({ message: "Invalid credentials" });
         } else {
-            // if (user.userType == "viewer"){find the role of viewer, add it in response}
-            // else if(user.userType == "editor"){find the role of editor, add it in response}
-            
+            // Fetch user details from the specific collection
+            const UserTypeModel = userTypeModels[user.userType];
+            const userDetails = await UserTypeModel.findOne({ userId: user._id });
+
+            if (!userDetails) {
+                return res.status(404).json({ message: "User details not found" });
+            }
+
             // User authenticated, generate token
             const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
 
             // Return the token
-            res.json({
+            return res.json({
                 token,
                 user: {
                     _id: user._id,
-                    name: user.name,
+                    name: userDetails.name,
                     email: user.email,
                     userType: user.userType,
+                    role: userDetails.role || null
                 },
             });
         }
     } catch (error) {
         console.error("Error during login:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };
