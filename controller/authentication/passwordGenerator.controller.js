@@ -10,5 +10,3 @@ export const passwordGenerator = (count) => {
         exclude: "'\"`$%^*()-_=+[{]}\\|;:,.<>/"
     })
 };
-
-console.log(passwordGenerator(3));
