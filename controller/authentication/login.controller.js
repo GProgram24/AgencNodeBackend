@@ -23,7 +23,7 @@ const userTypeModels = {
 // Controller function for user login
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
+
     try {
         // Find user based on email
         const user = await User.findOne({ email });
@@ -42,20 +42,17 @@ export const loginUser = async (req, res) => {
             const UserTypeModel = userTypeModels[user.userType];
             const userDetails = await UserTypeModel.findOne({ userId: user._id });
 
-            let brandDetails;
+            let brandDetails = {};
             // Fetch brand details for creator
             if (user.userType == "creator") {
                 brandDetails = await Brand.findOne({ managedby: userDetails._id });
-                console.log(brandDetails);
             }
             else if (user.userType == "editor" || user.userType == "viewer") {
                 const creatorDetails = await Creator.findOne({ _id: userDetails.parentId });
                 brandDetails = await Brand.findOne({ managedby: creatorDetails._id });
-                console.log(brandDetails);
             }
             // Fetch account details
             const accountDetails = await Account.findOne({ _id: user.accountId });
-            console.log(accountDetails);
 
             if (!userDetails) {
                 return res.status(404).json({ message: "User details not found" });
