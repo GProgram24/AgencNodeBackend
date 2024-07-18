@@ -12,12 +12,18 @@ const viewerSchema = new mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
+    unique: true
   },
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "creators",
+    ref: "Creator",
+    required: true,
+  },
+  brandId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Brand",
     required: true,
   }
 },
@@ -26,6 +32,4 @@ const viewerSchema = new mongoose.Schema({
 
   });
 
-const viewerModel = mongoose.model("viewer", viewerSchema);
-
-export default viewerModel;
+export default mongoose.model("Viewer", viewerSchema);

@@ -7,13 +7,15 @@ const custodianSchema = new mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
+    unique: true
   },
   accountId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "accounts",
+    ref: "Account",
     required: true,
+    unique: true
   }
 },
   {
@@ -21,6 +23,4 @@ const custodianSchema = new mongoose.Schema({
 
   });
 
-const custodianModel = mongoose.model("custodian", custodianSchema);
-
-export default custodianModel;
+export default mongoose.model("Custodian", custodianSchema);
