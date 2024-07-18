@@ -6,6 +6,9 @@ export const passwordGenerator = (count) => {
         numbers: true,
         symbols: true,
         uppercase: true,
-        lowercase: true
+        lowercase: true,
+        exclude: "'\"`$%^*()-_=+[{]}\\|;:,.<>/"
     })
 };
+
+console.log(passwordGenerator(3));
