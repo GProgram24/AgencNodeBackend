@@ -75,7 +75,7 @@ export const setupCreator = async (req, res) => {
         const brandsObj = reqObj.map((user, index) => ({
             name: user.brand,
             managedBy: createUserTypeResponse[index]._id,
-            accountId: accountIdResponse.accountId
+            accountId: accountIdResponse._id
         }));
         // Insert in brand collection
         const createBrandResponse = await Brand.insertMany(brandsObj);

@@ -7,7 +7,8 @@ import mongoose from "mongoose";
 
 export const fetchBrandHierarchy = async (req, res) => {
     try {
-        const brandId = new mongoose.Types.ObjectId(req.body.brandId);
+        const brandDetails = await Brand.findOne({ name: req.body.brand });
+        const brandId = brandDetails._id;
         // Fetch the main brand
         const brand = await Brand.findById(brandId)
             .populate({
