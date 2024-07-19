@@ -7,10 +7,7 @@ import bodyParser from "body-parser";
 import logger from "morgan";
 import * as Sentry from "@sentry/node";
 
-import login from "./router/authentication/login.route.js";
-// import signup from "./router/authentication/signup.route.js";
-import forgotPassword from "./router/authentication/forgotPassword.route.js";
-import passwordReset from "./router/authentication/passwordReset.route.js";
+import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
 import setCustodian from "./router/BrandArchitecture/setupCustodian.route.js";
 import setEditorViewer from "./router/BrandArchitecture/setupEditorViewer.route.js";
@@ -51,6 +48,10 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://agenc-frontend.vercel.app",
 ];
+
+// Middleware
+app.use(bodyParser.json());
+app.use(logger("dev"));
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -66,45 +67,16 @@ app.use(
   })
 );
 
-// Middleware
-app.use(bodyParser.json());
-app.use(logger("dev"));
-
 // To check server status
 app.get("/", (req, res) => {
   res.json({ status: "running" });
 });
-
-app.get("/debug-sentry", function mainHandler(req, res) {
-  throw new Error("My first Sentry error!");
-});
-
-app.use("/auth/login", login);
-// app.use("/signup", signup);
-app.use("/forgot-password", forgotPassword);
-app.use("/reset-password", passwordReset);
-app.use("/assign-creator", setCreator);
-app.use("/assign-custodian", setCustodian);
-app.use("/assign-role", setEditorViewer);
-app.use("/check", checkAvailability);
-app.use("/brand", brandHierarchy);
-// app.use("/product-services", productServiceRoutes);
-// app.use("/categories", categoryRoutes);
-// app.use("/sub-brands", subBrandRoutes);
-// app.use("/brands", brandRoutes);
-// app.use("/target-groups", targetGroupRoutes);
-// app.use("/projects", projectRoutes);
-// app.use("/users", userRoutes);
-// app.use("/product-service-metas", productServiceMetaRoutes);
-// app.use("/target-audiences", targetAudienceRoutes);
-// app.use("/communication-goals", communicationGoalsRoutes);
-// app.use("/user-brands", userBrandRoutes);
-// app.use("/user-sectors", userSectorRoutes);
-// app.use("/technologies", technologyRoutes);
-// app.use("/sectors", sectorRoutes);
-// app.use("/quarters", quarterRoutes);
-
-// app.use("/api/brand", savebrandRoute);
+app.use("/api/auth", authRouter);
+app.use("/api/assign-creator", setCreator);
+app.use("/api/assign-custodian", setCustodian);
+app.use("/api/assign-role", setEditorViewer);
+app.use("/api/check", checkAvailability);
+app.use("/api/brand", brandHierarchy);
 
 // MongoDB Connection
 mongoose

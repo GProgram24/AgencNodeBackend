@@ -5,6 +5,8 @@ import Viewer from "../../model/User/viewer.model.js";
 import Editor from "../../model/User/editor.model.js";
 import Creator from "../../model/User/creator.model.js";
 import Custodian from "../../model/User/custodian.model.js";
+import Account from "../../model/Brand/account.model.js";
+import Brand from "../../model/Brand/brand.model.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -21,7 +23,7 @@ const userTypeModels = {
 // Controller function for user login
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
+
     try {
         // Find user based on email
         const user = await User.findOne({ email });
@@ -40,6 +42,18 @@ export const loginUser = async (req, res) => {
             const UserTypeModel = userTypeModels[user.userType];
             const userDetails = await UserTypeModel.findOne({ userId: user._id });
 
+            let brandDetails = {};
+            // Fetch brand details for creator
+            if (user.userType == "creator") {
+                brandDetails = await Brand.findOne({ managedBy: userDetails._id });
+            }
+            else if (user.userType == "editor" || user.userType == "viewer") {
+                const creatorDetails = await Creator.findOne({ _id: userDetails.parentId });
+                brandDetails = await Brand.findOne({ managedby: creatorDetails._id });
+            }
+            // Fetch account details
+            const accountDetails = await Account.findOne({ _id: user.accountId });
+
             if (!userDetails) {
                 return res.status(404).json({ message: "User details not found" });
             }
@@ -55,7 +69,9 @@ export const loginUser = async (req, res) => {
                     name: userDetails.name,
                     email: user.email,
                     userType: user.userType,
-                    role: userDetails.role || null
+                    role: userDetails.role || null,
+                    accountName: accountDetails.name || null,
+                    brandName: brandDetails.name || null
                 },
             });
         }
