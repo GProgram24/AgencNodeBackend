@@ -13,22 +13,6 @@ import setCustodian from "./router/BrandArchitecture/setupCustodian.route.js";
 import setEditorViewer from "./router/BrandArchitecture/setupEditorViewer.route.js";
 import checkAvailability from "./router/checkAvailability.route.js";
 import brandHierarchy from "./router/BrandArchitecture/brandArchitecture.route.js";
-// import productServiceRoutes from "./router/productService.route.js";
-// import categoryRoutes from "./router/category.route.js";
-// import subBrandRoutes from "./router/subBrand.route.js";
-// import brandRoutes from "./router/brand.route.js";
-// import targetGroupRoutes from "./router/targetGroup.route.js";
-// import projectRoutes from "./router/project.route.js";
-// import userRoutes from "./router/user.route.js";
-// import productServiceMetaRoutes from "./router/productServiceMeta.route.js";
-// import targetAudienceRoutes from "./router/targetAudience.route.js";
-// import communicationGoalsRoutes from "./router/communicationGoal.route.js";
-// import userBrandRoutes from "./router/userBrand.route.js";
-// import userSectorRoutes from "./router/userSector.route.js";
-// import technologyRoutes from "./router/technology.route.js";
-// import sectorRoutes from "./router/sector.route.js";
-// import quarterRoutes from "./router/quarter.route.js";
-// import savebrandRoute from "./router/BrandArchitecture/saveBrandArchitecture.route.js";
 
 dotenv.config();
 
