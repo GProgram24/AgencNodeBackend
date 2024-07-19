@@ -1,5 +1,5 @@
 import express from "express";
-import { setupCreator } from "../../controller/authentication/setupCreator.Controller.js";
+import { setupCreator } from "../../controller/BrandArchitecture/setupCreator.Controller.js";
 
 const router = express.Router();
 
