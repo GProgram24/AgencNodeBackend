@@ -1,9 +1,11 @@
+import "./instrument.js";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
+import * as Sentry from "@sentry/node";
 
 import login from "./router/authentication/login.route.js";
 // import signup from "./router/authentication/signup.route.js";
@@ -36,6 +38,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
+// Optional fallthrough error handler
+app.use(function onError(err, req, res, next) {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  res.statusCode = 500;
+  res.end(res.sentry + "\n");
+});
+
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173",
@@ -65,7 +75,11 @@ app.get("/", (req, res) => {
   res.json({ status: "running" });
 });
 
-app.use("/login", login);
+app.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("My first Sentry error!");
+});
+
+app.use("/auth/login", login);
 // app.use("/signup", signup);
 app.use("/forgot-password", forgotPassword);
 app.use("/reset-password", passwordReset);
@@ -97,6 +111,9 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to MongoDB");
+
+    // The error handler must be registered before any other error middleware and after all controllers
+    Sentry.setupExpressErrorHandler(app);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
