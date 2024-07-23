@@ -42,6 +42,10 @@ export const loginUser = async (req, res) => {
             const UserTypeModel = userTypeModels[user.userType];
             const userDetails = await UserTypeModel.findOne({ userId: user._id });
 
+            if (!userDetails) {
+                return res.status(404).json({ message: "User details not found" });
+            }
+
             let brandDetails = {};
             // Fetch brand details for creator
             if (user.userType == "creator") {
@@ -49,18 +53,14 @@ export const loginUser = async (req, res) => {
             }
             else if (user.userType == "editor" || user.userType == "viewer") {
                 const creatorDetails = await Creator.findOne({ _id: userDetails.parentId });
-                brandDetails = await Brand.findOne({ managedby: creatorDetails._id });
+                brandDetails = await Brand.findOne({ managedBy: creatorDetails._id });
             }
             // Fetch account details
             const accountDetails = await Account.findOne({ _id: user.accountId });
 
-            if (!userDetails) {
-                return res.status(404).json({ message: "User details not found" });
-            }
-
             // User authenticated, generate token
             const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
-
+            
             // Return the token
             return res.json({
                 token,
@@ -70,6 +70,7 @@ export const loginUser = async (req, res) => {
                     email: user.email,
                     userType: user.userType,
                     role: userDetails.role || null,
+                    onboardingProgress: userDetails.onboardingProgress !== undefined && userDetails.onboardingProgress !== null ? userDetails.onboardingProgress : null,
                     accountName: accountDetails.name || null,
                     brandName: brandDetails.name || null
                 },
