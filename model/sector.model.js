@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const sectorSchema = new mongoose.Schema({
-  productServiceId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "ProductService" },
+  brandId: { type: mongoose.Schema.Types.ObjectId, required: true, unique:true, ref: "Brand" },
   name: {
     type: String,
     required: true,
