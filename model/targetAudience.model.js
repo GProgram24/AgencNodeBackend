@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const targetAudienceData = new mongoose.Schema({
-  targetGroupName: { type: String, required: true },
+  name: { type: String, required: true },
   lowerAge: { type: Number, required: true },
   upperAge: { type: Number, required: true },
   goalsAndNeeds: { type: String, required: true },
@@ -10,7 +10,7 @@ const targetAudienceData = new mongoose.Schema({
 });
 
 const targetAudienceSchema = new mongoose.Schema({
-  productServiceId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "ProductService" },
+  productServiceId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "ProductService" },
   targetAudeince: [{ type: targetAudienceData, required: true }],
 
 },
