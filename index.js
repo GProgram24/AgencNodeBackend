@@ -59,7 +59,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/creator", setCreator);
 app.use("/api/custodian", setCustodian);
-app.use("/api/assign-role", setEditorViewer);
+app.use("/api/role", setEditorViewer);
 app.use("/api/check", checkAvailability);
 app.use("/api/brand", brandHierarchy);
 app.use("/api/product", productSetup);
