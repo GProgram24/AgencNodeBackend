@@ -11,7 +11,7 @@ const targetAudienceData = new mongoose.Schema({
 
 const targetAudienceSchema = new mongoose.Schema({
   productServiceId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "ProductService" },
-  targetAudeince: [{ type: targetAudienceData, required: true }],
+  targetAudience: [{ type: targetAudienceData, required: true }],
 
 },
   { timestamps: true }
