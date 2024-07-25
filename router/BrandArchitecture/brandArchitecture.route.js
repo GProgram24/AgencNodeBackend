@@ -5,8 +5,8 @@ import { addSector } from "../../controller/BrandArchitecture/saveSector.control
 
 const router = express.Router();
 
-router.post("/save-hierarchy", saveBrandArchitecture);
-router.post("/get-hierarchy", fetchBrandHierarchy);
+router.post("/hierarchy", saveBrandArchitecture);
+router.get("/:brandName", fetchBrandHierarchy);
 router.post("/sector", addSector);
 
 export default router;
