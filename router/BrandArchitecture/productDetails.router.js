@@ -4,7 +4,7 @@ import { addProductServiceMeta, addTargetAudience, getProductDetails } from "../
 const router = express.Router();
 
 router.post("/description", addProductServiceMeta);
-router.post("/target-audience", addTargetAudience);
+router.post("/audience", addTargetAudience);
 router.get("/:brandName", getProductDetails);
 
 export default router;
