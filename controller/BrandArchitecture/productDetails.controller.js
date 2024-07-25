@@ -1,6 +1,8 @@
-import targetAudience from "../../model/targetAudience.model.js";
+import Brand from "../../model/Brand/brand.model.js";
 import productServiceMeta from "../../model/productServiceMeta.model.js";
+import productService from "../../model/Brand/productService.model.js";
 import Sector from "../../model/sector.model.js";
+import targetAudience from "../../model/targetAudience.model.js";
 
 // Insert sector and subsectore data in Database
 export const addSector = async (req, res) => {
@@ -72,5 +74,36 @@ export const addTargetAudience = async (req, res) => {
 
 // Fetch all product details of a brand from Database
 export const getProductDetails = async (req, res) => {
-    return res.json({ message: "productdetails controller route" })
+    try {
+        const { brandName } = req.params;
+        // Find the brandId
+        const brand = await Brand.findOne({ name: brandName }).exec();
+        if (!brand) {
+            return res.status(404).json({ message: 'Brand not found' });
+        }
+
+        // Find products associated with the brand and populate related metadata
+        const products = await productService.find({ brand: brand._id });
+
+        // Find metadata for each product
+        const productIds = products.map(product => product._id);
+        const productMeta = await productServiceMeta.find({ productServiceId: { $in: productIds } }).exec();
+
+        // Map the metadata to products
+        const productsWithMeta = products.map(product => {
+            const meta = productMeta.find(meta => meta.productServiceId.equals(product._id));
+            return {
+                productId: product._id,
+                name: product.name,
+                description: meta ? meta.description : "",
+                feature: meta ? meta.feature : "",
+                attributes: meta ? meta.attributes : "",
+                usp: meta ? meta.usp : ""
+            };
+        });
+        return res.json({ message: productsWithMeta })
+    } catch (err) {
+        console.log("Error at getting product:", err);
+        return res.status(500).json("Server Error");
+    }
 }
