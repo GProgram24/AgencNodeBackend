@@ -39,10 +39,16 @@ export const addSector = async (req, res) => {
 export const addProductServiceMeta = async (req, res) => {
     try {
         // extracting required data from request object
-        const { productServiceId, description, feature, attributes, usp } = req.body;
+        const { productId, description, feature, attributes, usp } = req.body;
         // check if all data required for insertion is present
-        if (productServiceId && description && feature && attributes && usp) {
-            const addProductData = new productServiceMeta(req.body);
+        if (productId && description && feature && attributes && usp) {
+            const addProductData = new productServiceMeta(
+                {
+                    productServiceId: productId,
+                    description: description,
+                    feature: feature,
+                    attributes: attributes, usp: usp
+                });
             addProductData.save()
                 .then(() => {
                     return res.status(201).json({ message: "Successful" });
