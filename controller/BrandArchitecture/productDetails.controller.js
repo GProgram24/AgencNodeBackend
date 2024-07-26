@@ -3,6 +3,12 @@ import productServiceMeta from "../../model/productServiceMeta.model.js";
 import productService from "../../model/Brand/productService.model.js";
 import targetAudience from "../../model/targetAudience.model.js";
 import mongoose from "mongoose";
+
+const detailObject = {
+    description: productServiceMeta,
+    audience: targetAudience
+}
+
 // Insert product details data in Database
 export const addProductServiceMeta = async (req, res) => {
     try {
@@ -77,32 +83,54 @@ export const addTargetAudience = async (req, res) => {
 export const getProductDetails = async (req, res) => {
     try {
         const { brandName } = req.params;
-        // Find the brandId
-        const brand = await Brand.findOne({ name: brandName }).exec();
-        if (!brand) {
-            return res.status(404).json({ message: 'Brand not found' });
+        const detailType = req.query.details;
+        
+        // Selecting collection required to fetch the data from
+        const selectCollection = detailObject[detailType];
+        
+        if (selectCollection) {
+            // Find the brandId
+            const brand = await Brand.findOne({ name: brandName }).exec();
+            if (!brand) {
+                return res.status(404).json({ message: 'Brand not found' });
+            }
+
+            // Find products associated with the brand and populate related metadata
+            const products = await productService.find({ brand: brand._id });
+
+            // Find metadata for each product
+            const productIds = products.map(product => product._id);
+            const productMeta = await selectCollection.find({ productServiceId: { $in: productIds } }).exec();
+
+            // Map the metadata to products
+            if (detailType == "description") {
+                const productsWithMeta = products.map(product => {
+                    const meta = productMeta.find(meta => meta.productServiceId.equals(product._id));
+                    return {
+                        productId: product._id,
+                        name: product.name,
+                        description: meta ? meta.description : "",
+                        feature: meta ? meta.feature : "",
+                        attributes: meta ? meta.attributes : "",
+                        usp: meta ? meta.usp : ""
+                    };
+                });
+                return res.status(200).json({ message: productsWithMeta });
+            } else if (detailType == "audience") {
+                // Map the audience to products
+                const productsWithAudience = products.map(product => {
+                    const meta = productMeta.find(meta => meta.productServiceId.equals(product._id));
+                    return {
+                        productId: product._id,
+                        name: product.name,
+                        targetAudience: meta ? meta.targetAudience : []
+                    };
+                });
+                return res.status(200).json({ message: productsWithAudience });
+            }
+        } else {
+            return res.status(400).json({ message: "Invalid request" });
         }
-
-        // Find products associated with the brand and populate related metadata
-        const products = await productService.find({ brand: brand._id });
-
-        // Find metadata for each product
-        const productIds = products.map(product => product._id);
-        const productMeta = await productServiceMeta.find({ productServiceId: { $in: productIds } }).exec();
-
-        // Map the metadata to products
-        const productsWithMeta = products.map(product => {
-            const meta = productMeta.find(meta => meta.productServiceId.equals(product._id));
-            return {
-                productId: product._id,
-                name: product.name,
-                description: meta ? meta.description : "",
-                feature: meta ? meta.feature : "",
-                attributes: meta ? meta.attributes : "",
-                usp: meta ? meta.usp : ""
-            };
-        });
-        return res.json({ message: productsWithMeta })
     } catch (err) {
         console.log("Error at getting product:", err);
         return res.status(500).json("Server Error");
