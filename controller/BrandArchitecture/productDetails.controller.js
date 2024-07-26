@@ -9,32 +9,31 @@ const detailObject = {
     audience: targetAudience
 }
 
-// Insert product details data in Database
+// Insert/update product details data in Database
 export const addProductServiceMeta = async (req, res) => {
     try {
         // extracting required data from request object
         const { productId, description, feature, attributes, usp } = req.body;
         // check if all data required for insertion is present
         if (mongoose.isValidObjectId(productId) && description && feature && attributes && usp) {
-            const addProductData = new productServiceMeta(
-                {
-                    productServiceId: productId,
-                    description: description,
-                    feature: feature,
-                    attributes: attributes, usp: usp
-                });
-            addProductData.save()
-                .then(() => {
-                    return res.status(201).json({ message: "Successful" });
+            const productData = {
+                description: description,
+                feature: feature,
+                attributes: attributes,
+                usp: usp
+            };
+            const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+            productServiceMeta.findOneAndUpdate({ productServiceId: productId }, productData, options)
+                .then((result) => {
+                    // Determine if the document was inserted or updated
+                    console.log(result);
+                    const response = result.lastErrorObject && result.lastErrorObject.upserted ? "Inserted successfully" : "Updated successfully";
+                    return res.status(201).json({ message: response });
                 })
                 // handle errors
                 .catch((err) => {
-                    if (err.code == 11000) {
-                        return res.status(400).json({ message: "Desciption already present" });
-                    } else {
-                        console.log("Error at adding product description, database error:", err);
-                        return res.status(500).json({ message: "Server error" });
-                    }
+                    console.log("Error at adding/updating product description, database error:", err);
+                    return res.status(500).json({ message: "Server error" });
                 });
         } else {
             // if required data is not recieved in request
@@ -84,10 +83,10 @@ export const getProductDetails = async (req, res) => {
     try {
         const { brandName } = req.params;
         const detailType = req.query.details;
-        
+
         // Selecting collection required to fetch the data from
         const selectCollection = detailObject[detailType];
-        
+
         if (selectCollection) {
             // Find the brandId
             const brand = await Brand.findOne({ name: brandName }).exec();
