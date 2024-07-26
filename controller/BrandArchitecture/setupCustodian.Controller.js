@@ -7,66 +7,69 @@ import axios from "axios";
 
 export const setupCustodian = async (req, res) => {
     const reqObj = req.body;
-    console.log(reqObj);
-    if (!Array.isArray(reqObj) || reqObj.length === 0) {
-        return res.status(422).json({ message: 'Invalid input. Please provide an array of objects.' });
+    // Check if request object is not blank
+    if (!(reqObj.name && reqObj.email && reqObj.userType && reqObj.account)) {
+        return res.status(422).json({ message: 'Insufficient data' });
     }
     try {
-        // Respond with return as other operations need to be completed
-        // checking email already exist is not required since its is already checked via get-user route
-        res.status(201).json({
-            message: 'Successful'
-        });
-
-        // Generate passwords for all users
-        const passwords = passwordGenerator(reqObj.length);
+        // Generate passwords
+        const passwords = passwordGenerator(1);
 
         // Add passwords to request objects for sending mail
-        const usersWithPasswords = reqObj.map((user, index) => ({
-            ...user,
-            password: passwords[index]
-        }));
-
-        // Send email to users with their unhashed passwords
-        for (const user of usersWithPasswords) {
-            await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
-                to: user.email,
-                subject: "Welcome to AGenC",
-                organisation: user.account,
-                userType: user.userType.charAt(0).toUpperCase() + user.userType.slice(1),
-                name: user.name,
-                password: user.password
-            });
-        }
+        const usersWithPassword = {
+            ...reqObj,
+            password: passwords[0]
+        };
 
         // Create object for account collection
-        const accountObj = reqObj.map((object, index) => (
-            { name: object.account }
-        ))
+        const accountObj = { name: reqObj.account }
+
         // Insert account into the database
-        const createAccountsResponse = await Account.insertMany(accountObj)
+        const createAccountsResponse = new Account(accountObj);
+        await createAccountsResponse.save();
 
         // Add hashed passwords to request objects and prepare for insertion
-        const usersWithHashedPasswords = await Promise.all(
-            reqObj.map(async (user, index) => ({
-                ...user,
-                password: await bcrypt.hash(passwords[index], 10),
-                accountId: createAccountsResponse[index]._id
-            }))
-        );
-        // Insert users into the database
-        const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
+        const usersWithHashedPassword = {
+            ...reqObj,
+            password: await bcrypt.hash(passwords[0], 10),
+            accountId: createAccountsResponse._id
+        };
+
+        // Insert users into the database and send response
+        const createUserResponse = new User(usersWithHashedPassword);
+        await createUserResponse.save()
+            .then(() => {
+                res.status(201).json({
+                    message: 'Successful'
+                });
+            });
+
+        // Send email to users with their unhashed passwords
+        await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
+            to: usersWithPassword.email,
+            subject: "Welcome to AGenC",
+            organisation: usersWithPassword.account,
+            userType: usersWithPassword.userType.charAt(0).toUpperCase() + usersWithPassword.userType.slice(1),
+            name: usersWithPassword.name,
+            password: usersWithPassword.password
+        });
 
         // Create object for custodian collection
-        const custodianObj = usersWithHashedPasswords.map((user, index) => ({
-            ...user,
-            userId: createUsersResponse[index]._id
-        }));
+        const custodianObj = {
+            ...usersWithHashedPassword,
+            userId: createUserResponse._id
+        };
         // Insert in respective userType collection
-        const createUserTypeResponse = await Custodian.insertMany(custodianObj);
-        console.log(createUserTypeResponse);
+        const createUserTypeResponse = new Custodian(custodianObj);
+        await createUserTypeResponse.save();
 
     } catch (error) {
+        // For duplicate key error
+        if (error.code == 11000) {
+            return res.status(400).json({ message: "User/Account exists" });
+        }
+        // Any other error
         console.error("Error during creator setup: ", error);
+        return res.status(500).json({ message: "Server error" });
     }
 };
