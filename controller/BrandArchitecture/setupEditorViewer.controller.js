@@ -13,12 +13,7 @@ const setupEditorViewer = async (req, res) => {
         return res.status(422).json({ message: 'Invalid input. Please provide an array of objects.' });
     };
     try {
-        // Respond with return as other operations need to be completed
         // checking email already exist is not required since its is already checked via /check route
-        res.status(201).json({
-            message: "Successful"
-        });
-
         // Generate passwords for all users
         const passwords = passwordGenerator(reqObj.length);
 
@@ -28,24 +23,9 @@ const setupEditorViewer = async (req, res) => {
             password: passwords[index]
         }));
 
-        // Send email to users with their unhashed passwords
-        for (const user of usersWithPasswords) {
-            await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
-                to: user.email,
-                subject: "Welcome to AGenC",
-                organisation: user.brand,
-                userType: user.userType.charAt(0).toUpperCase() + user.userType.slice(1),
-                name: user.name,
-                role: user.role,
-                password: user.password
-            });
-        }
-
         // Fetch account id and creator id using brand name from brand collection, since brand name is unique
         const brandName = reqObj[0].brand;
         const brandResponse = await Brand.findOne({ "name": brandName }).select(["managedBy","accountId"]);
-        console.log(brandResponse);
-
 
         // Add hashed passwords and accountId to request objects and prepare for insertion
         const usersWithHashedPasswords = await Promise.all(
@@ -60,7 +40,24 @@ const setupEditorViewer = async (req, res) => {
 
         // Insert users into the database
         const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
-        console.log(createUsersResponse);
+        
+        // Send response and continue operations
+        res.status(201).json({
+            message: "Successful"
+        });
+        // Send email to users with their unhashed passwords
+        for (const user of usersWithPasswords) {
+            await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
+                to: user.email,
+                subject: "Welcome to AGenC",
+                organisation: user.brand,
+                userType: user.userType.charAt(0).toUpperCase() + user.userType.slice(1),
+                name: user.name,
+                role: user.role,
+                password: user.password
+            });
+        }
+
 
         // Create object for editor/viewer collection
         const editorViewerObj = usersWithHashedPasswords.map((user, index) => ({
@@ -70,14 +67,13 @@ const setupEditorViewer = async (req, res) => {
         // Insert in respective userType collection
         if (reqObj[0].userType == "editor") {
             const createUserTypeResponse = await Editor.insertMany(editorViewerObj);
-            console.log(createUserTypeResponse);
         } else if (reqObj[0].userType == "viewer") {
             const createUserTypeResponse = await Viewer.insertMany(editorViewerObj);
-            console.log(createUserTypeResponse);
         }
 
     } catch (err) {
         console.log("Error during editor/viewer setup: " + err);
+        return res.status(500).json({ message: "Server error" });
     }
 
 }
