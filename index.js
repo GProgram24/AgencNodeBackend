@@ -1,11 +1,9 @@
-// import "./instrument.js";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
-// import * as Sentry from "@sentry/node";
 
 import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
@@ -19,14 +17,6 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT;
-
-// Optional fallthrough error handler
-// app.use(function onError(err, req, res, next) {
-//   // The error id is attached to `res.sentry` to be returned
-//   // and optionally displayed to the user for support.
-//   res.statusCode = 500;
-//   res.end(res.sentry + "\n");
-// });
 
 // CORS configuration
 const allowedOrigins = [
@@ -69,9 +59,12 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to MongoDB");
-
-    // The error handler must be registered before any other error middleware and after all controllers
-    // Sentry.setupExpressErrorHandler(app);
+    // to keep free server up
+    // Note: uncomment below code only when pushing on server, do not use on localhost
+    setInterval(async () => {
+        const response = await fetch("https://agencnodebackend.onrender.com/");
+        console.log(await response.json());
+    }, 600000)
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
