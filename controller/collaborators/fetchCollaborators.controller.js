@@ -2,7 +2,7 @@ import editorModel from "../../model/User/editor.model.js";
 import viewerModel from "../../model/User/viewer.model.js";
 import brandModel from "../../model/Brand/brand.model.js";
 
-// Controller function to get editors and viewers by brand name
+// Controller function to get editors and viewers by brand name and group them by roles
 const fetchCollaborators = async (req, res) => {
   const { brandName } = req.params;
 
@@ -20,7 +20,33 @@ const fetchCollaborators = async (req, res) => {
     const editors = await editorModel.find({ brandId });
     const viewers = await viewerModel.find({ brandId });
 
-    return res.status(200).json({ editors, viewers });
+    // Initialize an object to hold the collaborators grouped by roles
+    const collaborators = {
+      longform: [],
+      automation: [],
+      community: [],
+      performance: [],
+    };
+
+    // Group editors by their roles
+    editors.forEach((editor) => {
+      editor.role.forEach((role) => {
+        if (collaborators[role]) {
+          collaborators[role].push(editor);
+        }
+      });
+    });
+
+    // Group viewers by their roles
+    viewers.forEach((viewer) => {
+      viewer.role.forEach((role) => {
+        if (collaborators[role]) {
+          collaborators[role].push(viewer);
+        }
+      });
+    });
+
+    return res.status(200).json(collaborators);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
