@@ -5,6 +5,7 @@ import brandModel from "../../model/Brand/brand.model.js";
 // Controller function to get editors and viewers by brand name and group them by roles
 const fetchCollaborators = async (req, res) => {
   const { brandName } = req.params;
+  const { vertical } = req.query;
 
   try {
     // Find the brand by name
@@ -46,6 +47,12 @@ const fetchCollaborators = async (req, res) => {
       });
     });
 
+    // If a valid vertical is provided, return users based on that role only
+    if (vertical && collaborators.hasOwnProperty(vertical)) {
+      return res.status(200).json({ [vertical]: collaborators[vertical] });
+    }
+
+    // Return all collaborators grouped by roles
     return res.status(200).json(collaborators);
   } catch (error) {
     return res.status(500).json({ message: error.message });
