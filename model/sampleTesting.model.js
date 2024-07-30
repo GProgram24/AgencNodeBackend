@@ -10,17 +10,15 @@ const targetAudienceData = new mongoose.Schema({
 });
 
 const sampleTestingSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "User" },
-    productCombination: [
-        {
+    userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
+    task: {
             type: {
-                productId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, ref: "ProductService" },
-                targetAudience: { type: targetAudienceData, required: true },
-                platform: { type: String, required: true }
+                productId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "ProductService" },
+                productName: { type: String },
+                targetAudience: [{ type: targetAudienceData, required: true }]
             },
             required: true
         }
-    ]
 },
     { timestamps: true }
 );
