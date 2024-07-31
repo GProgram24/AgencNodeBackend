@@ -3,7 +3,7 @@ import productServiceMeta from "../../model/productServiceMeta.model.js";
 import productService from "../../model/Brand/productService.model.js";
 import targetAudience from "../../model/targetAudience.model.js";
 import mongoose from "mongoose";
-import { divideSampleContentTask } from "../sampleContent.controller.js";
+import { divideSampleContentTask } from "../misc/sampleTestingTask.function.js";
 
 const detailObject = {
   description: productServiceMeta,
@@ -119,7 +119,7 @@ export const getProductDetails = async (req, res) => {
 
     if (selectCollection) {
       // Find products associated with the brand
-      const products = await ProductService.find({ brand: brand._id });
+      const products = await productService.find({ brand: brand._id });
 
       // Find metadata for each product
       const productIds = products.map((product) => product._id);

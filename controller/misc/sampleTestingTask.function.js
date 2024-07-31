@@ -1,10 +1,10 @@
 // Import model for user, 
-import SampleTesting from "../model/sampleTestingTask.model.js";
-import Brand from "../model/Brand/brand.model.js";
-import Editor from "../model/User/editor.model.js";
-import Viewer from "../model/User/viewer.model.js";
-import productService from "../model/Brand/productService.model.js";
-import targetAudience from "../model/targetAudience.model.js";
+import SampleTesting from "../../model/sampleTestingTask.model.js";
+import Brand from "../../model/Brand/brand.model.js";
+import Editor from "../../model/User/editor.model.js";
+import Viewer from "../../model/User/viewer.model.js";
+import productService from "../../model/Brand/productService.model.js";
+import targetAudience from "../../model/targetAudience.model.js";
 
 // Function to assign verticals task
 export const divideSampleContentTask = async (brandName) => {

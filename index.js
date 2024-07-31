@@ -13,6 +13,7 @@ import checkAvailability from "./router/checkAvailability.route.js";
 import brandHierarchy from "./router/BrandArchitecture/brandArchitecture.route.js";
 import productSetup from "./router/BrandArchitecture/productDetails.router.js";
 import platformAccess from "./router/platformAccess.router.js";
+import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 
 dotenv.config();
 
@@ -55,6 +56,8 @@ app.use("/api/check", checkAvailability);
 app.use("/api/brand", brandHierarchy);
 app.use("/api/product", productSetup);
 app.use("/api/platform", platformAccess);
+// to update onboarding progress, keep as last route
+app.patch("/api/onboarding/progress", updateOnboardingProgress);
 
 // MongoDB Connection
 mongoose
