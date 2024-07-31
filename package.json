@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.16.0",
     "@sentry/node": "^8.18.0",
     "@sentry/profiling-node": "^8.18.0",
     "axios": "^1.7.2",
