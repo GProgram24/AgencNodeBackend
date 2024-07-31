@@ -12,6 +12,7 @@ import setEditorViewer from "./router/BrandArchitecture/setupEditorViewer.route.
 import checkAvailability from "./router/checkAvailability.route.js";
 import brandHierarchy from "./router/BrandArchitecture/brandArchitecture.route.js";
 import productSetup from "./router/BrandArchitecture/productDetails.router.js";
+import platformAccess from "./router/platformAccess.router.js";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/collaborator", setEditorViewer);
 app.use("/api/check", checkAvailability);
 app.use("/api/brand", brandHierarchy);
 app.use("/api/product", productSetup);
+app.use("/api/platform", platformAccess);
 
 // MongoDB Connection
 mongoose

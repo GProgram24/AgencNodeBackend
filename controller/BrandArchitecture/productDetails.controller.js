@@ -3,6 +3,7 @@ import productServiceMeta from "../../model/productServiceMeta.model.js";
 import productService from "../../model/Brand/productService.model.js";
 import targetAudience from "../../model/targetAudience.model.js";
 import mongoose from "mongoose";
+import { divideSampleContentTask } from "../sampleContent.controller.js";
 
 const detailObject = {
     description: productServiceMeta,
@@ -58,7 +59,11 @@ export const addTargetAudience = async (req, res) => {
                 targetAudience: data
             });
             addTargetAudience.save()
-                .then(() => { return res.status(201).json({ message: "successful" }); })
+                .then(async () => {
+                    res.status(201).json({ message: "successful" });
+                    const divideTask = await divideSampleContentTask(req.query.brand);
+                    console.log(divideTask);
+                })
                 .catch((err) => {
                     // If duplicate key error
                     if (err.code == 11000) {
@@ -94,14 +99,14 @@ export const getProductDetails = async (req, res) => {
                 return res.status(404).json({ message: 'Brand not found' });
             }
 
-            // Find products associated with the brand and populate related metadata
+            // Find products associated with the brand
             const products = await productService.find({ brand: brand._id });
 
-            // Find metadata for each product
+            // Find required data associated with products
             const productIds = products.map(product => product._id);
             const productMeta = await selectCollection.find({ productServiceId: { $in: productIds } }).exec();
 
-            // Map the metadata to products
+            // Map the data to products
             if (detailType == "description") {
                 const productsWithMeta = products.map(product => {
                     const meta = productMeta.find(meta => meta.productServiceId.equals(product._id));
