@@ -3,11 +3,11 @@ import productServiceMeta from "../../model/productServiceMeta.model.js";
 import productService from "../../model/Brand/productService.model.js";
 import targetAudience from "../../model/targetAudience.model.js";
 import mongoose from "mongoose";
+import { divideSampleContentTask } from "../sampleContent.controller.js";
 
 const detailObject = {
   description: productServiceMeta,
-  audience: targetAudience,
-  product: productService,
+  audience: targetAudience
 };
 
 // Insert/update product details data in Database
@@ -61,40 +61,37 @@ export const addProductServiceMeta = async (req, res) => {
 
 // Insert targetaudience data in Database
 export const addTargetAudience = async (req, res) => {
-  try {
-    // Extract required data from request object
-    const { productId, data } = req.body;
-    // Check if all recieved data is present and valid
-    if (mongoose.isValidObjectId(productId) && data && data.length) {
-      const addTargetAudience = new targetAudience({
-        productServiceId: productId,
-        targetAudience: data,
-      });
-      addTargetAudience
-        .save()
-        .then(() => {
-          return res.status(201).json({ message: "successful" });
-        })
-        .catch((err) => {
-          // If duplicate key error
-          if (err.code == 11000) {
-            return res.json({ message: "Data already present" });
-          } else {
-            console.log(
-              "Error at saving target audience, database error:",
-              err
-            );
-            return res.status(500).json({ message: "error" });
-          }
-        });
-    } else {
-      // If all required data is not present in request object
-      return res.status(422).json({ message: "Incomplete request data" });
-    }
-  } catch (err) {
-    console.log("Error at addProductServiceMeta:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
+    try {
+        // Extract required data from request object
+        const { productId, data } = req.body;
+        // Check if all recieved data is present and valid
+        if (mongoose.isValidObjectId(productId) && data && data.length) {
+            const addTargetAudience = new targetAudience({
+                productServiceId: productId,
+                targetAudience: data
+            });
+            addTargetAudience.save()
+                .then(async () => {
+                    res.status(201).json({ message: "successful" });
+                    const divideTask = await divideSampleContentTask(req.query.brand);
+                    console.log(divideTask);
+                })
+                .catch((err) => {
+                    // If duplicate key error
+                    if (err.code == 11000) {
+                        return res.json({ message: "Data already present" })
+                    } else {
+                        console.log("Error at saving target audience, database error:", err);
+                        return res.status(500).json({ message: "error" });
+                    }
+                })
+        } else {
+            // If all required data is not present in request object
+            return res.status(422).json({ message: "Incomplete request data" });
+        }
+    } catch (err) {
+        console.log("Error at addProductServiceMeta:", err);
+        return res.status(500).json({ message: "Server error" });
 };
 
 export const getProductDetails = async (req, res) => {
