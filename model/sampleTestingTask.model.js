@@ -23,4 +23,4 @@ const sampleTestingSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
-export default mongoose.model('SampleTesting', sampleTestingSchema);
+export default mongoose.model('SampleTestingTask', sampleTestingSchema);

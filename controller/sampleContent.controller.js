@@ -1,5 +1,5 @@
 // Import model for user, 
-import SampleTesting from "../model/sampleTesting.model.js";
+import SampleTesting from "../model/sampleTestingTask.model.js";
 import Brand from "../model/Brand/brand.model.js";
 import Editor from "../model/User/editor.model.js";
 import Viewer from "../model/User/viewer.model.js";
@@ -7,14 +7,13 @@ import productService from "../model/Brand/productService.model.js";
 import targetAudience from "../model/targetAudience.model.js";
 
 // Function to assign verticals task
-export const divideSampleContentTask = async (req, res) => {
+export const divideSampleContentTask = async (brandName) => {
     try {
-        const brandName = req.query.brandName;
         // Get brandId
         if (brandName) {
             const brand = await Brand.findOne({ name: brandName });
             if (!brand) {
-                return res.status(404).json({ messgae: "Brand not found" });
+                return "Brand not found";
             }
             // Fetch users assigned with roles
             const editors = await Editor.find({ brandId: brand._id }).select(["_id", "-parentId", "-createdAt", "-updatedAt", "-__v"]);
@@ -82,7 +81,6 @@ export const divideSampleContentTask = async (req, res) => {
             Object.keys(verticalGroups).forEach(vertical => {
                 const users = verticalGroups[vertical];
                 const nUsers = users.length;
-                const nTask = taskList.length;
                 let index = 0;
                 taskList.forEach(task => {
                     taskAssign.push({
@@ -95,14 +93,11 @@ export const divideSampleContentTask = async (req, res) => {
 
             // insert assigned tasks in database
             const assignInsertResponse = await SampleTesting.insertMany(taskAssign);
-            console.log(assignInsertResponse);
-            return res.status(201).json({
-                message: "successful"
-            });
+            return "successful";
         }
-        else { return res.status(422).json({ message: "Invalid request" }) }
+        else { return "Invalid request"; }
     } catch (error) {
         console.log("Error at assigning verticals task:", error);
-        return res.json({ message: "Server error" });
+        return "Server error";
     }
 }

@@ -3,6 +3,7 @@ import productServiceMeta from "../../model/productServiceMeta.model.js";
 import productService from "../../model/Brand/productService.model.js";
 import targetAudience from "../../model/targetAudience.model.js";
 import mongoose from "mongoose";
+import { divideSampleContentTask } from "../sampleContent.controller.js";
 
 const detailObject = {
     description: productServiceMeta,
@@ -58,7 +59,11 @@ export const addTargetAudience = async (req, res) => {
                 targetAudience: data
             });
             addTargetAudience.save()
-                .then(() => { return res.status(201).json({ message: "successful" }); })
+                .then(async () => {
+                    res.status(201).json({ message: "successful" });
+                    const divideTask = await divideSampleContentTask(req.query.brand);
+                    console.log(divideTask);
+                })
                 .catch((err) => {
                     // If duplicate key error
                     if (err.code == 11000) {
