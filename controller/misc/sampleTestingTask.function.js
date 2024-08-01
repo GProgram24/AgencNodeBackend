@@ -1,4 +1,4 @@
-// Import model for user, 
+import mongoose from "mongoose";
 import SampleTesting from "../../model/sampleTestingTask.model.js";
 import Brand from "../../model/Brand/brand.model.js";
 import Editor from "../../model/User/editor.model.js";
@@ -99,5 +99,20 @@ export const divideSampleContentTask = async (brandName) => {
     } catch (error) {
         console.log("Error at assigning verticals task:", error);
         return "Server error";
+    }
+}
+
+export const getSampleTestingTask = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (mongoose.isValidObjectId(userId)) {
+            const tasks = await SampleTesting.find({ userId: userId });
+            return res.status(200).json({ message: tasks });
+        } else {
+            return res.status(401).json({ message: "Invalid user" });
+        }
+    } catch (error) {
+        console.log("Error at fetching sample testing task:", error);
+        res.json({ message: "Server error" });
     }
 }
