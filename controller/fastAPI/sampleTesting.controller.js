@@ -22,6 +22,7 @@ export const sampleTesting = async (req, res) => {
 
         // Data to send in the POST request
         const postData = {
+            vertical: vertical,
             platform_name: reqObj.platform,
             product_name: productParent.name,
             description: productDetail.description,
