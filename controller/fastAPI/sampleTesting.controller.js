@@ -22,8 +22,8 @@ export const sampleTesting = async (req, res) => {
 
         // Data to send in the POST request
         const postData = {
-            hierarchy: productHierarchy,
-            product_name: reqObj.productName,
+            platform_name: reqObj.platform,
+            product_name: productParent.name,
             description: productDetail.description,
             feature: productDetail.feature,
             attributes: productDetail.attributes,
@@ -34,13 +34,16 @@ export const sampleTesting = async (req, res) => {
             pain_points: reqObj.painPoints,
             region: reqObj.region,
         };
+        console.log(postData)
         try {
             // Send a POST request to another URL
-            const response = await axios.post(`${process.env.FASTAPI_SERVER}/prompt`, postData);
-            console.log('POST request successful:', response.data);
+            const response = await axios.post(`${process.env.FASTAPI_SERVER}/prompt`, postData, {
+                params: { type: "generate" }
+            });
+            return res.status(200).json({ message: response.data });
         } catch (error) {
-            console.error('Error in POST request:', error);
-            return res.status(500).json({ message: "Server erro" });
+            console.error('Error in generating sample testing content:', error);
+            return res.status(500).json({ message: error });
         }
     } else {
         return res.status(404).json({ message: "Invalid request" });
