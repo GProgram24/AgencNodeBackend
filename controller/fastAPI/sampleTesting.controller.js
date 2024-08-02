@@ -35,13 +35,12 @@ export const sampleTesting = async (req, res) => {
             pain_points: reqObj.painPoints,
             region: reqObj.region,
         };
-        console.log(postData)
         try {
-            // Send a POST request to another URL
+            // Send a POST request to FastAPI
             const response = await axios.post(`${process.env.FASTAPI_SERVER}/prompt`, postData, {
                 params: { type: "generate" }
             });
-            return res.status(200).json({ message: response.data });
+            return res.status(200).send(response.data);
         } catch (error) {
             console.error('Error in generating sample testing content:', error);
             return res.status(500).json({ message: error });
