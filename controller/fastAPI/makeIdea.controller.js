@@ -19,7 +19,7 @@ export const makeIdea = async (req, res) => {
 
         // Data to send in the POST request
         const postData = {
-            platform_name: reqObj.touchpoint,
+            touchpoint: reqObj.touchpoint,
             user_idea: reqObj.userIdea,
             goal: reqObj.goal,
             tone: reqObj.tone,
