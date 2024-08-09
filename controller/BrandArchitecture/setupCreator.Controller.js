@@ -8,76 +8,83 @@ import axios from "axios";
 import Account from "../../model/Brand/account.model.js";
 
 export const setupCreator = async (req, res) => {
-    const reqObj = req.body;
+  const reqObj = req.body;
 
-    if (!Array.isArray(reqObj) || reqObj.length === 0) {
-        return res.status(422).json({ message: 'Invalid input. Please provide an array of objects.' });
-    };
-    try {
-        // checking email already exist is not required since its is already checked via /check route
-        // Generate passwords for all users
-        const passwords = passwordGenerator(reqObj.length);
+  if (!Array.isArray(reqObj) || reqObj.length === 0) {
+    return res
+      .status(422)
+      .json({ message: "Invalid input. Please provide an array of objects." });
+  }
+  try {
+    // checking email already exist is not required since its is already checked via /check route
+    // Generate passwords for all users
+    const passwords = passwordGenerator(reqObj.length);
 
-        // Add passwords to request objects for sending mail
-        const usersWithPasswords = reqObj.map((user, index) => ({
-            ...user,
-            password: passwords[index]
-        }));
+    // Add passwords to request objects for sending mail
+    const usersWithPasswords = reqObj.map((user, index) => ({
+      ...user,
+      password: passwords[index],
+    }));
 
-        // Fetch account id using custodian mail from user collection
-        const accountName = reqObj[0].account;
-        const accountIdResponse = await Account.findOne({ "name": accountName }).select("_id");
+    // Fetch account id using custodian mail from user collection
+    const accountName = reqObj[0].account;
+    const accountIdResponse = await Account.findOne({
+      name: accountName,
+    }).select("_id");
+    console.log(accountIdResponse);
 
-        // Get custodian id from custodian collection for parentId field, using _id from account collection
-        const custodianIdResponse = await Custodian.findOne({ "accountId": accountIdResponse._id }).select("_id");
+    // Get custodian id from custodian collection for parentId field, using _id from account collection
+    const custodianIdResponse = await Custodian.findOne({
+      accountId: accountIdResponse._id,
+    }).select("_id");
 
-        // Add hashed passwords to request objects and prepare for insertion
-        const usersWithHashedPasswords = await Promise.all(
-            reqObj.map(async (user, index) => ({
-                ...user,
-                accountId: accountIdResponse._id,
-                password: await bcrypt.hash(passwords[index], 10)
-            }))
-        );
+    // Add hashed passwords to request objects and prepare for insertion
+    const usersWithHashedPasswords = await Promise.all(
+      reqObj.map(async (user, index) => ({
+        ...user,
+        accountId: accountIdResponse._id,
+        password: await bcrypt.hash(passwords[index], 10),
+      }))
+    );
 
-        // Insert users into the database
-        const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
-        res.status(201).json({
-            message: 'Successful'
-        });
+    // Insert users into the database
+    const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
+    res.status(201).json({
+      message: "Successful",
+    });
 
-        // Send email to users with their unhashed passwords
-        for (const user of usersWithPasswords) {
-            await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
-                to: user.email,
-                subject: "Welcome to AGenC",
-                organisation: user.brand,
-                userType: user.userType.charAt(0).toUpperCase() + user.userType.slice(1),
-                name: user.name,
-                password: user.password
-            });
-        }
-
-        // Create object for creator collection
-        const creatorsObj = reqObj.map((user, index) => ({
-            name: user.name,
-            userId: createUsersResponse[index]._id,
-            parentId: custodianIdResponse._id
-        }));
-        // Insert in respective userType collection
-        const createUserTypeResponse = await Creator.insertMany(creatorsObj);
-
-        // Create object for brand collection
-        const brandsObj = reqObj.map((user, index) => ({
-            name: user.brand,
-            managedBy: createUserTypeResponse[index]._id,
-            accountId: accountIdResponse._id
-        }));
-        // Insert in brand collection
-        const createBrandResponse = await Brand.insertMany(brandsObj);
-
-    } catch (error) {
-        console.error("Error during creator setup: ", error);
-        return res.status(500).json({ message: "Server error" });
+    // Send email to users with their unhashed passwords
+    for (const user of usersWithPasswords) {
+      await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
+        to: user.email,
+        subject: "Welcome to AGenC",
+        organisation: user.brand,
+        userType:
+          user.userType.charAt(0).toUpperCase() + user.userType.slice(1),
+        name: user.name,
+        password: user.password,
+      });
     }
+
+    // Create object for creator collection
+    const creatorsObj = reqObj.map((user, index) => ({
+      name: user.name,
+      userId: createUsersResponse[index]._id,
+      parentId: custodianIdResponse._id,
+    }));
+    // Insert in respective userType collection
+    const createUserTypeResponse = await Creator.insertMany(creatorsObj);
+
+    // Create object for brand collection
+    const brandsObj = reqObj.map((user, index) => ({
+      name: user.brand,
+      managedBy: createUserTypeResponse[index]._id,
+      accountId: accountIdResponse._id,
+    }));
+    // Insert in brand collection
+    const createBrandResponse = await Brand.insertMany(brandsObj);
+  } catch (error) {
+    console.error("Error during creator setup: ", error);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
