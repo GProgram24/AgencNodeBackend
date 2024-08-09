@@ -1,4 +1,4 @@
-import taskModel from "../../model/User/task.model.js";
+import taskModel from "../../model/Project/task.model.js";
 
 // Controller to handle task creation
 const taskCreation = async (req, res) => {
