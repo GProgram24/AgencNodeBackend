@@ -50,7 +50,7 @@ export const setupCreator = async (req, res) => {
     // Insert users into the database
     const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
     res.status(201).json({
-      message: "Successful",
+      message: usersWithPasswords,
     });
 
     // Send email to users with their unhashed passwords
