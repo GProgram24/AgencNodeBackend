@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
+import http from "http";
 
 import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
@@ -16,11 +17,15 @@ import platformAccess from "./router/platformAccess.router.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
+import { setupWebSockets } from "./controller/fastAPI/webSocketHandler.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT;
+
+// HTTP server created from the Express app
+const server = http.createServer(app);
 
 // CORS configuration
 const allowedOrigins = [
@@ -62,6 +67,9 @@ app.use("/api/content", fastAPIHandler);
 app.post("/api/task", getSampleTestingTask);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
+// web-socket
+setupWebSockets(server);
+
 
 // MongoDB Connection
 mongoose
@@ -74,7 +82,7 @@ mongoose
     //     const response = await fetch("https://agencnodebackend.onrender.com/");
     //     console.log(await response.json());
     // }, 600000)
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
