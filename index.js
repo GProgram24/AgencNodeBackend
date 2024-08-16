@@ -14,6 +14,7 @@ import checkAvailability from "./router/checkAvailability.route.js";
 import brandHierarchy from "./router/BrandArchitecture/brandArchitecture.route.js";
 import productSetup from "./router/BrandArchitecture/productDetails.router.js";
 import platformAccess from "./router/platformAccess.router.js";
+import taskCreation from "./router/Project/task.route.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
@@ -65,6 +66,7 @@ app.use("/api/product", productSetup);
 app.use("/api/platform", platformAccess);
 app.use("/api/content", fastAPIHandler);
 app.post("/api/task", getSampleTestingTask);
+app.use("/api/project", taskCreation);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 // web-socket
@@ -78,11 +80,11 @@ mongoose
     console.log("Connected to MongoDB");
     // to keep free server up
     // Note: uncomment below code only when pushing on server, do not use on localhost
-    // setInterval(async () => {
-    //     const response = await fetch("https://agencnodebackend.onrender.com/");
-    //     console.log(await response.json());
-    // }, 600000)
-    server.listen(PORT, () => {
+    setInterval(async () => {
+        const response = await fetch("https://agencnodebackend.onrender.com/");
+        console.log(await response.json());
+    }, 600000)
+    app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })

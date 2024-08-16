@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import dotenv from "dotenv";
 import axios from "axios";
+import bcrypt from "bcryptjs";
 import User from "../../model/User/user.model.js";
 import Auth from "../../model/User/auth.model.js";
 
@@ -55,8 +56,10 @@ export const resetPassword = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: "invalid url" });
         }
+        // Hash the new password
+        hash_password = await bcrypt.hash(newPassword, 10)
         // Update password of associated user
-        const updatePassword = await User.updateOne({ "email": user.email }, { "password": newPassword });
+        const updatePassword = await User.updateOne({ "email": user.email }, { "password": hash_password });
         if (updatePassword.modifiedCount == 1) {
             await Auth.deleteOne({ "email": user.email })
                 .then(() => {
