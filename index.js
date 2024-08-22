@@ -29,8 +29,8 @@ const PORT = process.env.PORT;
 
 // Uncomment the following lines if using HTTPS with a self-signed certificate
 const options = {
-  key: fs.readFileSync("/config/key.pem"),
-  cert: fs.readFileSync("/config/cert.pem"),
+  key: fs.readFileSync("./config/key.pem"),
+  cert: fs.readFileSync("./config/cert.pem"),
 };
 
 // HTTPS server
