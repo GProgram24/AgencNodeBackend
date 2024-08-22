@@ -25,6 +25,7 @@
     "express-session": "^1.18.0",
     "generate-password": "^1.7.1",
     "googleapis": "^140.0.1",
+    "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.7.0",
     "mongoose": "^8.4.3",

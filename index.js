@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
 import http from "http";
+import https from "https"; // Uncomment if using SSL
+import fs from "fs"; // Required if using SSL
 
 import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
@@ -25,8 +27,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
+// Uncomment the following lines if using HTTPS with a self-signed certificate
+const options = {
+  key: fs.readFileSync("/config/key.pem"),
+  cert: fs.readFileSync("/config/cert.pem"),
+};
+
+// HTTPS server
+const server = https.createServer(options, app);
+
+
 // HTTP server created from the Express app
-const server = http.createServer(app);
+// const server = http.createServer(app);
 
 // CORS configuration
 const allowedOrigins = [
