@@ -29,28 +29,28 @@ const PORT = process.env.PORT;
 const server = http.createServer(app);
 
 // CORS configuration
-// const allowedOrigins = [
-//   "http://localhost:5173",
-//   "https://agenc-frontend.vercel.app",
-// ];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://agenc-frontend.vercel.app",
+];
 
 // // Middleware
 app.use(bodyParser.json());
 app.use(logger("dev"));
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       // Allow requests with no origin (like mobile apps or curl requests)
-//       if (!origin) return callback(null, true);
-//       if (allowedOrigins.indexOf(origin) === -1) {
-//         const msg =
-//           "The CORS policy for this site does not allow access from the specified Origin.";
-//         return callback(new Error(msg), false);
-//       }
-//       return callback(null, true);
-//     },
-//   })
-// );
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
 
 // To check server status
 app.get("/", (req, res) => {
