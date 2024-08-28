@@ -3,10 +3,13 @@ import Project from "../../model/Project/project.model.js";
 
 export const createProject = async (req, res) => {
     try {
-        const { name, startDate, endDate } = req.body;
+        const { name, startDate, endDate, tasks = [], creatorId } = req.body;
         // Check if request data is valid
         if (!name || !startDate || !endDate) {
             return res.status(422).json({ message: "Missing required data" });
+        }
+        if (!mongoose.isValidObjectId(creatorId)) {
+            return res.status(422).json({ message: "invalid creator id" });
         }
 
         // Create a new project instance
@@ -14,7 +17,8 @@ export const createProject = async (req, res) => {
             name,
             startDate,
             endDate,
-            tasks, // Optional: Initialize with an empty array or task references
+            tasks,
+            creatorId,
         });
 
         // Save the project to the database
@@ -29,7 +33,28 @@ export const createProject = async (req, res) => {
 }
 
 export const getAllProject = async (req, res) => {
-    res.status(200).json({ message: "get all projects controller" })
+    try {
+        const { creatorId } = req.body;
+
+        // Check if creatorId is provided
+        if (!mongoose.isValidObjectId(creatorId)) {
+            return res.status(400).json({ message: "Creator ID is invalid." });
+        }
+
+        // Find all projects under the creator
+        const projects = await Project.find({ creator: creatorId }).select("name startDate endDate")
+
+        // Check if projects exist for the creator
+        if (projects.length === 0) {
+            return res.status(404).json({ message: "No projects found." });
+        } else {
+            // Return the list of projects
+            res.status(200).json(projects);
+        }
+    } catch (error) {
+        console.log("Error in fetching projects:", error);
+        res.status(500).json({ message: "Failed to retrieve projects" });
+    }
 }
 
 export const getProject = async (req, res) => {
@@ -49,6 +74,10 @@ export const getProject = async (req, res) => {
                     { path: "product", select: "name" }, // Select name from ProductService
                     { path: "targetAudience", select: "audienceName" } // Select audience name from TargetAudience
                 ]
+            })
+            .populate({
+                path: "creator",
+                select: "name", // Include creator name
             });
 
         // Check if the project exists
@@ -60,7 +89,7 @@ export const getProject = async (req, res) => {
         res.status(200).json(project);
     } catch (error) {
         console.log("Error in fetching single project:", error);
-        res.status(500).json({ message: "Failed to retrieve project"});
+        res.status(500).json({ message: "Failed to retrieve project" });
     }
 }
 
