@@ -16,7 +16,7 @@ export const setupCustodian = async (req, res) => {
         const passwords = passwordGenerator(1);
 
         // Add passwords to request objects for sending mail
-        const usersWithPassword = {
+        const userwithpassword = {
             ...reqObj,
             password: passwords[0]
         };
@@ -29,34 +29,35 @@ export const setupCustodian = async (req, res) => {
         await createAccountsResponse.save();
 
         // Add hashed passwords to request objects and prepare for insertion
-        const usersWithHashedPassword = {
+        const userWithHashedPassword = {
             ...reqObj,
             password: await bcrypt.hash(passwords[0], 10),
             accountId: createAccountsResponse._id
         };
 
         // Insert users into the database and send response
-        const createUserResponse = new User(usersWithHashedPassword);
+        const createUserResponse = new User(userWithHashedPassword);
         await createUserResponse.save()
             .then(() => {
                 res.status(201).json({
-                    message: 'Successful'
+                    message: 'Successful',
+                    data: userwithpassword
                 });
             });
 
         // Send email to users with their unhashed passwords
         await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
-            to: usersWithPassword.email,
+            to: userwithpassword.email,
             subject: "Welcome to AGenC",
-            organisation: usersWithPassword.account,
-            userType: usersWithPassword.userType.charAt(0).toUpperCase() + usersWithPassword.userType.slice(1),
-            name: usersWithPassword.name,
-            password: usersWithPassword.password
+            organisation: userwithpassword.account,
+            userType: userwithpassword.userType.charAt(0).toUpperCase() + userwithpassword.userType.slice(1),
+            name: userwithpassword.name,
+            password: userwithpassword.password
         });
 
         // Create object for custodian collection
         const custodianObj = {
-            ...usersWithHashedPassword,
+            ...userWithHashedPassword,
             userId: createUserResponse._id
         };
         // Insert in respective userType collection
