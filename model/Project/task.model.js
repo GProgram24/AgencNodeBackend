@@ -6,6 +6,10 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    finalContent: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       enum: [
@@ -45,6 +49,34 @@ const taskSchema = new mongoose.Schema(
     idea: {
       type: String,
       required: true,
+    },
+    touchpoint: {
+      type: String,
+      required: true,
+    },
+    goal: {
+      type: String,
+      required: true,
+    },
+    tone: {
+      type: String,
+      required: true,
+    },
+    viewerComment: {
+      type: String,
+      default: null,
+    },
+    viewerCommentDate: {
+      type: Date,
+      default: null,
+    },
+    editorComment: {
+      type: String,
+      default: null,
+    },
+    editorCommentDate: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }
