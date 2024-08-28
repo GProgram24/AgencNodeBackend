@@ -23,9 +23,9 @@ router.get("/:projectId", getProject);
 router.post("/content", addContent);
 
 // Route to remove content from a project
-router.delete("/content", removeContent);
+router.delete("/:projectId/content/:taskId", removeContent);
 
-// Route to delete a project
-router.delete("/", deleteProject);
+// Route to delete a specific project
+router.delete("/:projectId", deleteProject);
 
 export default router;
