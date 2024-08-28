@@ -68,7 +68,7 @@ app.use("/api/platform", platformAccess);
 app.use("/api/content", fastAPIHandler);
 app.post("/api/task", getSampleTestingTask);
 app.use("/api/project", projectRoute);
-app.use("/api/content", projectContentRoute);
+app.use("/api/project", projectContentRoute);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 // web-socket

@@ -9,10 +9,10 @@ import {
 const router = express.Router();
 
 // Route to handle task creation
-router.post("/", taskCreation);
+router.post("/task", taskCreation);
 
 // Route to add content to a project
-router.post("/content", addContent);
+router.post("/:projectId/content", addContent);
 
 // Route to remove content from a project
 router.delete("/:projectId/content/:taskId", removeContent);

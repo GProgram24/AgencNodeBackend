@@ -55,7 +55,8 @@ export const taskCreation = async (req, res) => {
 
 export const addContent = async (req, res) => {
   try {
-      const { projectId, taskIds } = req.body;
+      const { projectId } = req.params;
+      const { taskIds } = req.body;
 
       // Validate the projectId
       if (!mongoose.isValidObjectId(projectId)) {
