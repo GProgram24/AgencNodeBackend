@@ -19,7 +19,12 @@ const projectSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Task",
       default: []
-    }]
+    }],
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Reference to the creator who manages the project
+      required: true,
+    }
   },
   { timestamps: true }
 );
