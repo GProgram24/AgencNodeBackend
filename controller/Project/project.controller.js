@@ -1,6 +1,5 @@
 import mongoose, { Mongoose } from "mongoose";
 import Project from "../../model/Project/project.model.js";
-import Task from "../../model/Project/task.model.js";
 
 export const createProject = async (req, res) => {
     try {

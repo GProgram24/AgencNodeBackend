@@ -1,5 +1,6 @@
-import taskModel from "../../model/Project/task.model.js";
 import mongoose from "mongoose";
+import Project from "../../model/Project/project.model.js";
+import Task from "../../model/Project/task.model.js";
 
 // Controller to handle task creation
 export const taskCreation = async (req, res) => {
@@ -44,7 +45,7 @@ export const taskCreation = async (req, res) => {
     }));
 
     // Save all tasks to the database
-    const createdTasks = await taskModel.insertMany(tasks);
+    const createdTasks = await Task.insertMany(tasks);
 
     res.status(201).json({ message: "Tasks created successfully", tasks: createdTasks });
   } catch (error) {
@@ -53,6 +54,7 @@ export const taskCreation = async (req, res) => {
   }
 };
 
+// Controller to add contents to a project
 export const addContent = async (req, res) => {
   try {
       const { projectId } = req.params;
@@ -95,6 +97,7 @@ export const addContent = async (req, res) => {
   }
 }
 
+// Controller to remove a content from a project
 export const removeContent = async (req, res) => {
   try {
       const { projectId, taskId } = req.params;
