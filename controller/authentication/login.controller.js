@@ -72,7 +72,8 @@ export const loginUser = async (req, res) => {
                     role: userDetails.role || null,
                     onboardingProgress: userDetails.onboardingProgress !== undefined && userDetails.onboardingProgress !== null ? userDetails.onboardingProgress : null,
                     accountName: accountDetails.name || null,
-                    brandName: brandDetails.name || null
+                    brandName: brandDetails.name || null,
+                    active: accountDetails.active || null
                 },
             });
         }
