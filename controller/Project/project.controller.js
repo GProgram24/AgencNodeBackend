@@ -138,7 +138,7 @@ export const addContent = async (req, res) => {
 
 export const removeContent = async (req, res) => {
     try {
-        const { projectId, taskId } = req.body;
+        const { projectId, taskId } = req.params;
 
         // Validate the projectId
         if (!mongoose.isValidObjectId(projectId)) {
