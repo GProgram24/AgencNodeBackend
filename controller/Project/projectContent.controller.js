@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 // Controller to handle task creation
 const taskCreation = async (req, res) => {
   try {
-    const { creatorId, contentPieces, product, targetAudience, idea } = req.body;
+    const { creatorId, contentPieces, product, targetAudience, idea, touchpoint, goal, tone } = req.body;
 
     // Validate input
     if (
@@ -13,12 +13,15 @@ const taskCreation = async (req, res) => {
       contentPieces.length === 0 ||
       !product ||
       !targetAudience ||
-      !idea
+      !idea ||
+      !touchpoint ||
+      !goal ||
+      !tone
     ) {
       return res.status(400).json({ message: "Invalid input data" });
     }
 
-    // Validate received Id's
+    // Validate that creatorId, product, and targetAudience are valid ObjectIds
     if (
       !mongoose.isValidObjectId(creatorId) ||
       !mongoose.isValidObjectId(product) ||
@@ -34,6 +37,9 @@ const taskCreation = async (req, res) => {
       product,
       targetAudience,
       idea,
+      touchpoint,
+      goal,
+      tone,
       // Other fields will default to null
     }));
 
@@ -42,7 +48,8 @@ const taskCreation = async (req, res) => {
 
     res.status(201).json({ message: "Tasks created successfully", tasks: createdTasks });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.log("Error in saving tasks:", error);
+    res.status(500).json({ message: "Error saving tasks"});
   }
 };
 
