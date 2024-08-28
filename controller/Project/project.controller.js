@@ -8,6 +8,7 @@ export const createProject = async (req, res) => {
         if (!name || !startDate || !endDate) {
             return res.status(422).json({ message: "Missing required data" });
         }
+        // Check if received creatorId is valid
         if (!mongoose.isValidObjectId(creatorId)) {
             return res.status(422).json({ message: "invalid creator id" });
         }
@@ -36,7 +37,7 @@ export const getAllProject = async (req, res) => {
     try {
         const { creatorId } = req.body;
 
-        // Check if creatorId is provided
+        // Check if received creatorId is valid
         if (!mongoose.isValidObjectId(creatorId)) {
             return res.status(400).json({ message: "Creator ID is invalid." });
         }
@@ -60,7 +61,7 @@ export const getAllProject = async (req, res) => {
 export const getProject = async (req, res) => {
     try {
         const { projectId } = req.params;
-        // Check if the id received is valid
+        // Check if received project Id is valid
         if (!mongoose.isValidObjectId(projectId)) {
             return res.status(422).json({ message: "invalid project id" })
         }
@@ -93,14 +94,26 @@ export const getProject = async (req, res) => {
     }
 }
 
-export const addContent = async (req, res) => {
-    res.status(200).json({ message: "add content controller" })
-}
-
-export const removeContent = async (req, res) => {
-    res.status(200).json({ message: "remove content controller" })
-}
-
 export const deleteProject = async (req, res) => {
-    res.status(200).json({ message: "delete project controller" })
-}
+    try {
+        const { projectId } = req.params;
+
+        // Validate the received projectId
+        if (!mongoose.isValidObjectId(projectId)) {
+            return res.status(422).json({ message: "Invalid project ID." });
+        }
+
+        // Find the project by ID and delete it
+        const deletedProject = await Project.findByIdAndDelete(projectId);
+
+        // Check if the project was found and deleted
+        if (!deletedProject) {
+            return res.status(404).json({ message: "Project not found." });
+        }
+
+        // Return a success message
+        res.status(200).json({ message: "Project deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete project", error: error.message });
+    }
+};
