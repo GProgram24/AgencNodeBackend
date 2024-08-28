@@ -11,21 +11,21 @@ import {
 const router = express.Router();
 
 // Route to handle project creation
-router.post("/create", createProject);
+router.post("/", createProject);
 
 // Route to get all projects
-router.get("/all", getAllProject);
+router.get("/", getAllProject);
 
 // Route to get a specific project
 router.get("/:projectId", getProject);
 
 // Route to add content to a project
-router.post("/:projectId/content", addContent);
+router.post("/content", addContent);
 
 // Route to remove content from a project
-router.delete("/:projectId/content/:contentId", removeContent);
+router.delete("/content", removeContent);
 
 // Route to delete a project
-router.delete("/:projectId", deleteProject);
+router.delete("/", deleteProject);
 
 export default router;
