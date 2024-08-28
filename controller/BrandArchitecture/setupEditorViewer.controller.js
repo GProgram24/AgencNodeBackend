@@ -43,7 +43,8 @@ const setupEditorViewer = async (req, res) => {
         
         // Send response and continue operations
         res.status(201).json({
-            message: "Successful"
+            message: "Successful",
+            data: usersWithPasswords
         });
         // Send email to users with their unhashed passwords
         for (const user of usersWithPasswords) {
