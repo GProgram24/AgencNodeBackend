@@ -82,10 +82,12 @@ mongoose
     console.log("Connected to MongoDB");
     // to keep free server up
     // Note: uncomment below code only when pushing on server, do not use on localhost
-    // setInterval(async () => {
-    //     const response = await fetch("https://agencnodebackend.onrender.com/");
-    //     console.log(await response.json());
-    // }, 600000)
+    setInterval(async () => {
+        const response = await fetch("https://agencnodebackend.onrender.com/");
+        const response2 = await fetch("https://agencpythonbackend-nm74.onrender.com/");
+        console.log(await response.json());
+        console.log("FastAPI:", await response2.json());
+    }, 600000)
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

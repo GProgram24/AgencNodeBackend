@@ -51,6 +51,7 @@ export const setupCreator = async (req, res) => {
     const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
     res.status(201).json({
       message: "Successful",
+      data: usersWithPasswords
     });
 
     // Send email to users with their unhashed passwords
@@ -83,8 +84,13 @@ export const setupCreator = async (req, res) => {
     }));
     // Insert in brand collection
     const createBrandResponse = await Brand.insertMany(brandsObj);
-  } catch (error) {
-    console.error("Error during creator setup: ", error);
-    return res.status(500).json({ message: "Server error" });
-  }
+  } catch (err) {
+    console.log("Error during creator setup: " + err);
+    if(err.code == 11000){
+      return res.status(400).json({ message: "User/Account exists" });
+    }
+    else{
+        return res.status(500).json({ message: "Server error" });
+    }
+}
 };

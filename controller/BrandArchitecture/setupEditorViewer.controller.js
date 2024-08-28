@@ -43,7 +43,8 @@ const setupEditorViewer = async (req, res) => {
         
         // Send response and continue operations
         res.status(201).json({
-            message: "Successful"
+            message: "Successful",
+            data: usersWithPasswords
         });
         // Send email to users with their unhashed passwords
         for (const user of usersWithPasswords) {
@@ -71,9 +72,14 @@ const setupEditorViewer = async (req, res) => {
             const createUserTypeResponse = await Viewer.insertMany(editorViewerObj);
         }
 
-    } catch (err) {
-        console.log("Error during editor/viewer setup: " + err);
-        return res.status(500).json({ message: "Server error" });
+    } catch (error) {
+        console.log("Error during editor/viewer setup: " + error);
+        if(error.code == 11000){
+            return res.status(400).json({ message: "User/Account exists" });
+        }
+        else{
+            return res.status(500).json({ message: "Server error" });
+        }
     }
 
 }
