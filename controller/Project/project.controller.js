@@ -33,7 +33,7 @@ export const createProject = async (req, res) => {
     }
 }
 
-export const getAllProject = async (req, res) => {
+export const getAllProjects = async (req, res) => {
     try {
         const { creatorId } = req.body;
 

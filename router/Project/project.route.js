@@ -12,7 +12,7 @@ const router = express.Router();
 router.post("/", createProject);
 
 // Route to get all projects
-router.get("/", getAllProject);
+router.get("/", getAllProjects);
 
 // Route to get a specific project
 router.get("/:projectId", getProject);
