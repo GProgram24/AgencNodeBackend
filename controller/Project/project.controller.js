@@ -35,7 +35,7 @@ export const createProject = async (req, res) => {
 
 export const getAllProjects = async (req, res) => {
     try {
-        const { creatorId } = req.body;
+        const { creatorId } = req.query;
 
         // Check if received creatorId is valid
         if (!mongoose.isValidObjectId(creatorId)) {
