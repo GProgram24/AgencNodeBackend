@@ -2,9 +2,10 @@ import mongoose from "mongoose";
 import Project from "../../model/Project/project.model.js";
 import Task from "../../model/Project/task.model.js";
 
-// Controller to handle task creation
-export const taskCreation = async (req, res) => {
+// Controller to handle task creation and adding to project
+export const taskCreationAndAddToProject = async (req, res) => {
   try {
+    const { projectId } = req.params;
     const { creatorId, contentPieces, product, targetAudience, idea, touchpoint, goal, tone } = req.body;
 
     // Validate input
@@ -22,13 +23,20 @@ export const taskCreation = async (req, res) => {
       return res.status(400).json({ message: "Invalid input data" });
     }
 
-    // Validate that creatorId, product, and targetAudience are valid ObjectIds
+    // Validate that projectId, creatorId, product, and targetAudience are valid ObjectIds
     if (
+      !mongoose.isValidObjectId(projectId) ||
       !mongoose.isValidObjectId(creatorId) ||
       !mongoose.isValidObjectId(product) ||
       !mongoose.isValidObjectId(targetAudience)
     ) {
       return res.status(422).json({ message: "Invalid Id(s) provided" });
+    }
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
     }
 
     // Loop through the content pieces and create a task document for each
@@ -41,68 +49,26 @@ export const taskCreation = async (req, res) => {
       touchpoint,
       goal,
       tone,
+      status: "pending_approval",  // Set status during creation
       // Other fields will default to null
     }));
 
     // Save all tasks to the database
     const createdTasks = await Task.insertMany(tasks);
+    const createdTaskIds = createdTasks.map(task => task._id);
 
-    return res.status(201).json({ message: "Tasks created successfully", tasks: createdTasks });
+    // Add the created tasks to the project's tasks array
+    project.tasks.push(...createdTaskIds);
+
+    // Save the updated project
+    await project.save();
+
+    return res.status(201).json({ message: "Tasks created and added to project successfully.", project, tasks: createdTasks });
   } catch (error) {
-    console.log("Error in saving tasks:", error);
-    return res.status(500).json({ message: "Error saving tasks" });
+    console.log("Error in creating and adding tasks to project:", error);
+    return res.status(500).json({ message: "Error creating and adding tasks to project" });
   }
 };
-
-// Controller to add contents to a project
-export const addContent = async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const { taskIds } = req.body;
-
-    // Validate the projectId
-    if (!mongoose.isValidObjectId(projectId)) {
-      return res.status(422).json({ message: "Invalid project ID." });
-    }
-
-    // Validate the taskIds
-    if (!Array.isArray(taskIds) || taskIds.some(id => !mongoose.isValidObjectId(id))) {
-      return res.status(422).json({ message: "Invalid task IDs." });
-    }
-
-    // Find the project by ID
-    const project = await Project.findById(projectId);
-
-    if (!project) {
-      return res.status(404).json({ message: "Project not found." });
-    }
-
-    // Filter out any task IDs that are already in the project's tasks array
-    const existingTaskIds = new Set(project.tasks);
-    const newTaskIds = taskIds.filter(id => !existingTaskIds.has(id));
-
-    // Only update if there are new tasks to add
-    if (newTaskIds.length > 0) {
-      // Update the status of the new tasks to 'pending_approval'
-      await Task.updateMany(
-        { _id: { $in: newTaskIds } },
-        { $set: { status: "pending_approval" } }
-      );
-
-      project.tasks.push(...newTaskIds);
-
-      // Save the updated project
-      await project.save();
-      return res.status(200).json({ message: "Tasks added successfully.", project });
-    }
-
-    // If no new tasks were added, just return a message
-    return res.status(200).json({ message: "No new tasks to add.", project });
-  } catch (error) {
-    console.log("Error in adding task to project:", error);
-    return res.status(500).json({ message: "Failed to add tasks to project" });
-  }
-}
 
 // Controller to remove a content from a project
 export const removeContent = async (req, res) => {

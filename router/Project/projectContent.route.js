@@ -1,7 +1,6 @@
 import express from "express";
 import {
-    taskCreation,
-    addContent,
+    taskCreationAndAddToProject,
     removeContent,
 } from "../../controller/Project/projectContent.controller.js";
 import {
@@ -19,8 +18,7 @@ import {
 const router = express.Router();
 
 // Routes for task creation and content management in a project
-router.post("/task", taskCreation);
-router.post("/:projectId/content", addContent);
+router.post("/:projectId/task", taskCreationAndAddToProject);
 router.delete("/:projectId/content/:taskId", removeContent);
 
 // Routes for editor functionalities
