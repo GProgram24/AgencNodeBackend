@@ -7,13 +7,13 @@ import {
     fetchTasksForEditor,
     acceptTaskByEditor,
     approveTaskByEditor,
-} from "../../controller/Editor/editorTask.controller.js";
+} from "../../controller/Project/editorTask.controller.js";
 import {
     fetchTasksForViewer,
     acceptTaskByViewer,
     approveTaskByViewer,
     sendForEditing,
-} from "../../controller/Viewer/viewerTask.controller.js";
+} from "../../controller/Project/viewerTask.controller.js";
 
 const router = express.Router();
 

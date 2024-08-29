@@ -1,7 +1,7 @@
 import express from "express";
 import { 
     createProject, 
-    getAllProject, 
+    getAllProjects, 
     getProject,
     deleteProject 
 } from "../../controller/Project/project.controller.js";
