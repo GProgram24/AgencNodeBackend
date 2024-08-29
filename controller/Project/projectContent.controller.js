@@ -47,10 +47,10 @@ export const taskCreation = async (req, res) => {
     // Save all tasks to the database
     const createdTasks = await Task.insertMany(tasks);
 
-    res.status(201).json({ message: "Tasks created successfully", tasks: createdTasks });
+    return res.status(201).json({ message: "Tasks created successfully", tasks: createdTasks });
   } catch (error) {
     console.log("Error in saving tasks:", error);
-    res.status(500).json({ message: "Error saving tasks" });
+    return res.status(500).json({ message: "Error saving tasks" });
   }
 };
 
@@ -77,17 +77,18 @@ export const addContent = async (req, res) => {
       return res.status(404).json({ message: "Project not found." });
     }
 
-    // Update the status of the new tasks to 'pending_approval'
-    await Task.updateMany(
-      { _id: { $in: newTaskIds } },
-      { $set: { status: "pending_approval" } }
-    );
-
     // Filter out any task IDs that are already in the project's tasks array
-    const newTaskIds = taskIds.filter(id => !project.tasks.includes(id));
+    const existingTaskIds = new Set(project.tasks);
+    const newTaskIds = taskIds.filter(id => !existingTaskIds.has(id));
 
     // Only update if there are new tasks to add
     if (newTaskIds.length > 0) {
+      // Update the status of the new tasks to 'pending_approval'
+      await Task.updateMany(
+        { _id: { $in: newTaskIds } },
+        { $set: { status: "pending_approval" } }
+      );
+
       project.tasks.push(...newTaskIds);
 
       // Save the updated project
@@ -99,7 +100,7 @@ export const addContent = async (req, res) => {
     return res.status(200).json({ message: "No new tasks to add.", project });
   } catch (error) {
     console.log("Error in adding task to project:", error);
-    res.status(500).json({ message: "Failed to add tasks to project" });
+    return res.status(500).json({ message: "Failed to add tasks to project" });
   }
 }
 
@@ -142,6 +143,40 @@ export const removeContent = async (req, res) => {
     return res.status(404).json({ message: "Task not found in project." });
   } catch (error) {
     console.log("Error in removing task from project:", error);
-    res.status(500).json({ message: "Failed to remove task from project" });
+    return res.status(500).json({ message: "Failed to remove task from project" });
   }
 }
+
+// Publish content
+export const publishTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    // Validate taskId
+    if (!mongoose.isValidObjectId(taskId)) {
+      return res.status(422).json({ message: "Invalid task ID." });
+    }
+
+    // Find the task by ID
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    // Ensure the task is approved before publishing
+    if (task.status !== "approved") {
+      return res.status(400).json({ message: "Task must be approved before it can be published." });
+    }
+
+    // Update task status to 'published'
+    task.status = "published";
+
+    // Save the updated task
+    await task.save();
+
+    res.status(200).json({ message: "Task published successfully.", task });
+  } catch (error) {
+    console.log("Error in publishing task:", error);
+    res.status(500).json({ message: "Failed to publish task." });
+  }
+};

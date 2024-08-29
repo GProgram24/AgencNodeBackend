@@ -23,17 +23,17 @@ const taskSchema = new mongoose.Schema(
     },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Creator",
       required: true,
     },
     vettedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Viewer",
       default: null,
     },
     editedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Editor",
       default: null,
     },
     product: {
