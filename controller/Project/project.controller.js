@@ -43,14 +43,19 @@ export const getAllProjects = async (req, res) => {
         }
 
         // Find all projects under the creator
-        const projects = await Project.find({ creator: creatorId }).select("name startDate endDate")
+        const projects = await Project.find({ creator: creatorId })
+            .select("name startDate endDate tasks")
+            .populate({
+                path: 'tasks',
+                select: 'touchpoint goal'
+            });
 
         // Check if projects exist for the creator
         if (projects.length === 0) {
             return res.status(404).json({ message: "No projects found." });
         } else {
             // Return the list of projects
-            res.status(200).json(projects);
+            return res.status(200).json(projects);
         }
     } catch (error) {
         console.log("Error in fetching projects:", error);
