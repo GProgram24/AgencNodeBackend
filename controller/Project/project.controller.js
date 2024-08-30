@@ -19,7 +19,7 @@ export const createProject = async (req, res) => {
             startDate,
             endDate,
             tasks,
-            creatorId,
+            creator: creatorId,
         });
 
         // Save the project to the database
@@ -35,7 +35,7 @@ export const createProject = async (req, res) => {
 
 export const getAllProjects = async (req, res) => {
     try {
-        const { creatorId } = req.query;
+        const creatorId = req.query.id;
 
         // Check if received creatorId is valid
         if (!mongoose.isValidObjectId(creatorId)) {
