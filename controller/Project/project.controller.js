@@ -61,6 +61,7 @@ export const getAllProjects = async (req, res) => {
             const goals = Array.from(new Set(project.tasks.map(task => task.goal)));
 
                 return {
+                    id : project._id,
                     name: project.name,
                     startDate: project.startDate,
                     endDate: project.endDate,
