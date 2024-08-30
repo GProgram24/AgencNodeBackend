@@ -44,7 +44,7 @@ export const getAllProjects = async (req, res) => {
 
         // Find all projects under the creator
         const projects = await Project.find({ creator: creatorId })
-            .select("name startDate endDate tasks")
+            .select("name startDate endDate")
             .populate({
                 path: 'tasks',
                 select: 'touchpoint goal'
@@ -54,8 +54,23 @@ export const getAllProjects = async (req, res) => {
         if (projects.length === 0) {
             return res.status(404).json({ message: "No projects found." });
         } else {
-            // Return the list of projects
-            return res.status(200).json(projects);
+            // Format the response with project details, touchpoints, and goals
+            const projectDetails = projects.map(project => {
+                // Collect and deduplicate all touchpoints and goals from the tasks
+            const touchpoints = Array.from(new Set(project.tasks.map(task => task.touchpoint)));
+            const goals = Array.from(new Set(project.tasks.map(task => task.goal)));
+
+                return {
+                    name: project.name,
+                    startDate: project.startDate,
+                    endDate: project.endDate,
+                    touchpoints: touchpoints,
+                    goals: goals
+                };
+            });
+
+            // Send the response with project details and associated tasks' touchpoints and goals
+            res.status(200).json({ projects: projectDetails });
         }
     } catch (error) {
         console.log("Error in fetching projects:", error);
