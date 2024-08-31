@@ -125,13 +125,13 @@ export const acceptTaskByViewer = async (req, res) => {
 
     // Find and update the task
     const task = await Task.findOneAndUpdate(
-      { _id: taskId, vettedBy: null, creator: creatorId }, // Only allow update if vettedBy is null and is of same creator
+      { _id: taskId, vettedBy: null, status: "pending_approval", creator: creatorId }, // Only allow update if vettedBy is null and is of same creator
       { vettedBy: viewerId },
       { new: true }
     );
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found or already accepted by another viewer." });
+      return res.status(404).json({ message: "Task not found, already accepted by another viewer, or not sent to viewer for approval." });
     }
 
     return res.status(200).json({ message: "Task accepted successfully.", task });

@@ -125,16 +125,16 @@ export const acceptTaskByEditor = async (req, res) => {
 
     // Find and update the task if it matches the creatorId and is not already accepted by another editor
     const task = await Task.findOneAndUpdate(
-      { _id: taskId, editedBy: null, creator: creatorId },
+      { _id: taskId, editedBy: null, status: "editing_required", creator: creatorId },
       { editedBy: editorId },
       { new: true }
     );
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found, already accepted by another editor, or does not match creator." });
+      return res.status(404).json({ message: "Task not found, already accepted by another editor, or not send for editing." });
     }
 
-    res.status(200).json({ message: "Task accepted successfully by editor.", task });
+    return res.status(200).json({ message: "Task accepted successfully by editor.", task });
   } catch (error) {
     console.log("Error in accepting task by editor:", error);
     res.status(500).json({ message: "Failed to accept task by editor." });
