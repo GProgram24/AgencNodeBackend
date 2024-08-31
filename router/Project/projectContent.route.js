@@ -4,12 +4,14 @@ import {
     removeContent,
 } from "../../controller/Project/projectContent.controller.js";
 import {
-    fetchTasksForEditor,
+    fetchUnacceptedTasksForEditor,
+    fetchAcceptedTasksForEditor,
     acceptTaskByEditor,
     approveTaskByEditor,
 } from "../../controller/Project/editorTask.controller.js";
 import {
-    fetchTasksForViewer,
+    fetchUnacceptedTasksForViewer,
+    fetchAcceptedTasksForViewer,
     acceptTaskByViewer,
     approveTaskByViewer,
     sendForEditing,
@@ -19,15 +21,17 @@ const router = express.Router();
 
 // Routes for task creation and content management in a project
 router.post("/:projectId/task", taskCreationAndAddToProject);
-router.delete("/:projectId/content/:taskId", removeContent);
+router.delete("/:projectId/tasks/:taskId", removeContent);
 
 // Routes for editor functionalities
-router.get("/tasks/editor/:editorId", fetchTasksForEditor);
+router.get("/tasks/editing-required/:editorId", fetchUnacceptedTasksForEditor);
+router.get("/tasks/editor/:editorId", fetchAcceptedTasksForEditor);
 router.post("/tasks/:taskId/accept/editor/:editorId", acceptTaskByEditor);
 router.post("/tasks/:taskId/approve/editor/:editorId", approveTaskByEditor);
 
 // Routes for viewer functionalities
-router.get("/tasks/viewer/:viewerId", fetchTasksForViewer);
+router.get("/tasks/approval-pending/:viewerId", fetchUnacceptedTasksForViewer);
+router.get("/tasks/viewer/:viewerId", fetchAcceptedTasksForViewer);
 router.post("/tasks/:taskId/accept/viewer/:viewerId", acceptTaskByViewer);
 router.post("/tasks/:taskId/approve/viewer/:viewerId", approveTaskByViewer);
 router.post("/tasks/:taskId/send-for-editing/:viewerId", sendForEditing);
