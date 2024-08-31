@@ -147,44 +147,58 @@ export const approveTaskByEditor = async (req, res) => {
     const { taskId, editorId } = req.params;
     const { comment, updatedContent } = req.body;
 
+    // Check request body for sufficient data
+    if (!updatedContent || updatedContent.trim() == "") {
+      return res.status(400).json({ message: "Please provide updated content" });
+    }
+
     // Validate taskId and editorId
     if (!mongoose.isValidObjectId(taskId) || !mongoose.isValidObjectId(editorId)) {
-      return res.status(422).json({ message: "Invalid task or editor ID." });
+      return res.status(400).json({ message: "Invalid task or editor ID." });
     }
 
-    // Fetch the parentId (creatorId) from the Editor model
-    const editor = await Editor.findOne({ _id: editorId }).select("parentId");
-    if (!editor) {
-      return res.status(404).json({ message: "Editor not found." });
-    }
+    // Find appropriate task and update
+    const task = await Task.findOneAndUpdate(
+      {
+        _id: taskId,
+        editedBy: editorId,
+        vettedBy: { $ne: null },
+        status: "editing_required"
+      },
+      {
+        $set: {
+          status: "approved",
+          finalContent: updatedContent,
+          editorComment: comment || task.editorComment,
+          editorCommentDate: comment ? new Date() : task.editorCommentDate
+        }
+      },
+      { new: true }
+    );
 
-    const creatorId = editor.parentId;
-
-    // Find the task by ID and ensure it matches the creatorId
-    const task = await Task.findOne({ _id: taskId, creator: creatorId });
     if (!task) {
-      return res.status(404).json({ message: "Task not found or does not match creator." });
+      // Perform additional checks to determine the specific reason for failure
+      const taskExists = await Task.findById(taskId);
+      if (!taskExists) {
+        return res.status(404).json({ message: "Task not found." });
+      }
+      if (taskExists.status !== "editing_required") {
+        return res.status(400).json({ message: "Task is not in editing required status." });
+      }
+      if (!taskExists.vettedBy) {
+        return res.status(403).json({ message: "Task not yet accepted by any viewer." });
+      }
+      if (!taskExists.editedBy) {
+        return res.status(403).json({ message: "Task not yet accepted by any editor." });
+      }
+      if (taskExists.editedBy.toString() !== editorId) {
+        return res.status(403).json({ message: "You are not authorized to approve this task." });
+      }
+
+      return res.status(500).json({ message: "Failed to update the task." });
     }
 
-    // Check if the editor is authorized to approve this task
-    if (task.editedBy && task.editedBy.toString() !== editorId) {
-      return res.status(403).json({ message: "You are not authorized to approve this task." });
-    }
-
-    // Update task status to 'approved' and set finalContent to the updated content
-    task.status = "approved";
-    task.finalContent = updatedContent || task.content; // Use updated content if provided, else use existing content
-
-    // Optionally add an editor comment
-    if (comment) {
-      task.editorComment = comment;
-      task.editorCommentDate = new Date();
-    }
-
-    // Save the updated task
-    await task.save();
-
-    res.status(200).json({ message: "Task approved successfully by editor.", task });
+    return res.status(200).json({ message: "Task approved successfully by editor.", task });
   } catch (error) {
     console.log("Error in approving task by editor:", error);
     res.status(500).json({ message: "Failed to approve task by editor." });

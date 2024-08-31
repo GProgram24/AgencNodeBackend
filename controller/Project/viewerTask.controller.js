@@ -152,34 +152,43 @@ export const approveTaskByViewer = async (req, res) => {
       return res.status(422).json({ message: "Invalid task or viewer ID." });
     }
 
-    // Find the task by ID and check if the status is "pending_approval"
-    const task = await Task.findOne({ _id: taskId, status: "pending_approval" });
+    // Find arropriate task and update
+    const task = await Task.findOneAndUpdate(
+      {
+        _id: taskId,
+        status: "pending_approval",
+        vettedBy: viewerId
+      },
+      {
+        $set: {
+          status: "approved",
+          finalContent: task.content, // Setting final content to the current content
+          viewerComment: comment || task.viewerComment,
+          viewerCommentDate: comment ? new Date() : task.viewerCommentDate
+        }
+      },
+      { new: true }
+    );
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found." });
-    }
-
-    // Check if the viewer requesting approval is the same as the one who accepted the task
-    if (!task.vettedBy) {
-      return res.status(403).json({ message: "Task not yet accepted by any viewer." });
-    } else if (task.vettedBy.toString() !== viewerId) {
-      return res.status(403).json({ message: "You are not authorized to approve this task." });
-    } else {
-      // Update task status to 'approved' and set finalContent to the current content
-      task.status = "approved";
-      task.finalContent = task.content;
-
-      // Optionally add a viewer comment
-      if (comment) {
-        task.viewerComment = comment;
-        task.viewerCommentDate = new Date();
+      // Perform an additional query to understand the failure reason
+      const taskExists = await Task.findById(taskId);
+      if (!taskExists) {
+        return res.status(404).json({ message: "Task not found." });
       }
-
-      // Save the updated task
-      await task.save();
-
-      return res.status(200).json({ message: "Task approved successfully by viewer.", task });
+      if (taskExists.status !== "pending_approval") {
+        return res.status(400).json({ message: "Task is not sent for approval." });
+      }
+      if (taskExists.vettedBy.toString() !== viewerId) {
+        return res.status(403).json({ message: "You are not authorized to approve this task." });
+      }
+      if (!taskExists.vettedBy) {
+        return res.status(403).json({ message: "Task is not accepted by any viewer." });
+      }
+      return res.status(500).json({ message: "Failed to update the task." });
     }
+
+    return res.status(200).json({ message: "Task approved successfully by viewer.", task });
   }
   catch (error) {
     console.log("Error in approving task by viewer:", error);
@@ -193,34 +202,52 @@ export const sendForEditing = async (req, res) => {
     const { taskId, viewerId } = req.params;
     const { comment } = req.body;
 
+    // Check request body for required data
+    if (!comment) {
+      return res.status(400).json({ message: "Comment is missing, required." });
+    }
+
     // Validate taskId and viewerId
     if (!mongoose.isValidObjectId(taskId) || !mongoose.isValidObjectId(viewerId)) {
       return res.status(422).json({ message: "Invalid task or viewer ID." });
     }
 
-    // Find the task by ID and check if the status is "pending_approval"
-    const task = await Task.findOne({ _id: taskId, status: "pending_approval" });
+    // Attempt to find and update the task in a single operation
+    const task = await Task.findOneAndUpdate(
+      {
+        _id: taskId,
+        status: "pending_approval",
+        vettedBy: viewerId
+      },
+      {
+        $set: {
+          status: "editing_required",
+          viewerComment: comment,
+          viewerCommentDate: new Date()
+        }
+      },
+      { new: true } // Return the updated document
+    );
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found." });
+      // Perform additional checks to determine the specific reason for failure
+      const taskExists = await Task.findById(taskId);
+      if (!taskExists) {
+        return res.status(404).json({ message: "Task not found." });
+      }
+      if (taskExists.status !== "pending_approval") {
+        return res.status(400).json({ message: "Task is not sent for approval." });
+      }
+      if (!taskExists.vettedBy) {
+        return res.status(403).json({ message: "Task not accepted by any viewer." });
+      }
+      if (taskExists.vettedBy.toString() !== viewerId) {
+        return res.status(403).json({ message: "You are not authorized to send this task for editing." });
+      }
+      return res.status(500).json({ message: "Failed to update the task." });
     }
 
-    // Check if the viewer requesting to send for editing is the same as the one who accepted the task
-    if (!task.vettedBy) {
-      return res.status(403).json({ message: "Task not yet accepted by any viewer." });
-    } else if (task.vettedBy.toString() !== viewerId) {
-      return res.status(403).json({ message: "You are not authorized to send this task for editing." });
-    } else {
-      // Update task status to 'editing_required' and add the viewer's comment
-      task.status = "editing_required";
-      task.viewerComment = comment;
-      task.viewerCommentDate = new Date();
-
-      // Save the updated task
-      await task.save();
-
-      return res.status(200).json({ message: "Task sent for editing.", task });
-    }
+    return res.status(200).json({ message: "Task sent for editing.", task });
   } catch (error) {
     console.log("Error in sending task for editing:", error);
     return res.status(500).json({ message: "Failed to send task for editing." });
