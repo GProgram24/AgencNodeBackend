@@ -152,12 +152,12 @@ export const approveTaskByViewer = async (req, res) => {
       return res.status(422).json({ message: "Invalid task or viewer ID." });
     }
 
-    // Find the task by ID
-    const task = await Task.findById(taskId);
+    // Find the task by ID and check if the status is "pending_approval"
+    const task = await Task.findOne({ _id: taskId, status: "pending_approval" });
+
     if (!task) {
       return res.status(404).json({ message: "Task not found." });
     }
-    console.log(task.vettedBy);
 
     // Check if the viewer requesting approval is the same as the one who accepted the task
     if (!task.vettedBy) {
@@ -165,7 +165,6 @@ export const approveTaskByViewer = async (req, res) => {
     } else if (task.vettedBy.toString() !== viewerId) {
       return res.status(403).json({ message: "You are not authorized to approve this task." });
     } else {
-
       // Update task status to 'approved' and set finalContent to the current content
       task.status = "approved";
       task.finalContent = task.content;
@@ -181,7 +180,8 @@ export const approveTaskByViewer = async (req, res) => {
 
       return res.status(200).json({ message: "Task approved successfully by viewer.", task });
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.log("Error in approving task by viewer:", error);
     return res.status(500).json({ message: "Failed to approve task by viewer." });
   }
@@ -198,8 +198,8 @@ export const sendForEditing = async (req, res) => {
       return res.status(422).json({ message: "Invalid task or viewer ID." });
     }
 
-    // Find the task by ID
-    const task = await Task.findById(taskId);
+    // Find the task by ID and check if the status is "pending_approval"
+    const task = await Task.findOne({ _id: taskId, status: "pending_approval" });
 
     if (!task) {
       return res.status(404).json({ message: "Task not found." });
