@@ -45,7 +45,9 @@ export const setupWebSockets = (server) => {
 
         clientSocket.on('close', () => {
             console.log('Frontend WebSocket client disconnected');
-            fastAPISocket.close();
+            if (fastAPISocket.readyState === WebSocket.OPEN) {
+                fastAPISocket.close();
+            }
         });
 
         clientSocket.on('error', (error) => {
@@ -53,7 +55,7 @@ export const setupWebSockets = (server) => {
         });
     });
 
-    // WebSocket server for brainstorming
+    // WebSocket server for make an idea
     const frontendIdea = new WebSocketServer({ server, path: '/api/content/idea' });
 
     frontendIdea.on('connection', (clientSocket) => {
@@ -95,7 +97,9 @@ export const setupWebSockets = (server) => {
 
         clientSocket.on('close', () => {
             console.log('Frontend WebSocket client disconnected');
-            fastAPISocket.close();
+            if (fastAPISocket.readyState === WebSocket.OPEN) {
+                fastAPISocket.close();
+            }
         });
 
         clientSocket.on('error', (error) => {
