@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const commentSchema = new mongoose.Schema({
+  comment: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  }
+});
+
 const taskSchema = new mongoose.Schema(
   {
     content: {
@@ -62,22 +73,8 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    viewerComment: {
-      type: String,
-      default: null,
-    },
-    viewerCommentDate: {
-      type: Date,
-      default: null,
-    },
-    editorComment: {
-      type: String,
-      default: null,
-    },
-    editorCommentDate: {
-      type: Date,
-      default: null,
-    },
+    viewerComments: [commentSchema],
+    editorComments: [commentSchema],
   },
   { timestamps: true }
 );

@@ -145,7 +145,7 @@ export const acceptTaskByEditor = async (req, res) => {
 export const approveTaskByEditor = async (req, res) => {
   try {
     const { taskId, editorId } = req.params;
-    const { comment, updatedContent } = req.body;
+    const { comments = [], updatedContent } = req.body;
 
     // Check request body for sufficient data
     if (!updatedContent || updatedContent.trim() == "") {
@@ -163,15 +163,21 @@ export const approveTaskByEditor = async (req, res) => {
         _id: taskId,
         editedBy: editorId,
         vettedBy: { $ne: null },
-        status: "editing_required"
+        status: "editing_required",
       },
       {
         $set: {
           status: "approved",
           finalContent: updatedContent,
-          editorComment: comment || task.editorComment,
-          editorCommentDate: comment ? new Date() : task.editorCommentDate
-        }
+        },
+        $push: {
+          editorComments: {
+            $each: comments.map((comment) => ({
+              comment: comment.text,
+              date: comment.date || new Date(),
+            })),
+          },
+        },
       },
       { new: true }
     );

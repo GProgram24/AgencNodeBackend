@@ -145,30 +145,19 @@ export const acceptTaskByViewer = async (req, res) => {
 export const approveTaskByViewer = async (req, res) => {
   try {
     const { taskId, viewerId } = req.params;
-    const { comment } = req.body;
+    const { comments = [] } = req.body;
 
     // Validate taskId and viewerId
     if (!mongoose.isValidObjectId(taskId) || !mongoose.isValidObjectId(viewerId)) {
       return res.status(422).json({ message: "Invalid task or viewer ID." });
     }
 
-    // Find arropriate task and update
-    const task = await Task.findOneAndUpdate(
-      {
-        _id: taskId,
-        status: "pending_approval",
-        vettedBy: viewerId
-      },
-      {
-        $set: {
-          status: "approved",
-          finalContent: task.content, // Setting final content to the current content
-          viewerComment: comment || task.viewerComment,
-          viewerCommentDate: comment ? new Date() : task.viewerCommentDate
-        }
-      },
-      { new: true }
-    );
+    // Find the appropriate task
+    const task = await Task.findOne({
+      _id: taskId,
+      status: "pending_approval",
+      vettedBy: viewerId,
+    });
 
     if (!task) {
       // Perform an additional query to understand the failure reason
@@ -188,9 +177,20 @@ export const approveTaskByViewer = async (req, res) => {
       return res.status(500).json({ message: "Failed to update the task." });
     }
 
-    return res.status(200).json({ message: "Task approved successfully by viewer.", task });
-  }
-  catch (error) {
+    // Update the task with the approval and final content
+    task.status = "approved";
+    task.finalContent = task.content;
+    task.viewerComments.push(
+      ...comments.map((comment) => ({
+        comment: comment.text,
+        date: comment.date || new Date(),
+      }))
+    );
+
+    const updatedTask = await task.save();
+
+    return res.status(200).json({ message: "Task approved successfully by viewer.", task: updatedTask });
+  } catch (error) {
     console.log("Error in approving task by viewer:", error);
     return res.status(500).json({ message: "Failed to approve task by viewer." });
   }
@@ -200,11 +200,11 @@ export const approveTaskByViewer = async (req, res) => {
 export const sendForEditing = async (req, res) => {
   try {
     const { taskId, viewerId } = req.params;
-    const { comment } = req.body;
+    const { comments } = req.body;
 
     // Check request body for required data
-    if (!comment) {
-      return res.status(400).json({ message: "Comment is missing, required." });
+    if (!comments || !Array.isArray(comments) || comments.length === 0) {
+      return res.status(400).json({ message: "Comments are missing, required." });
     }
 
     // Validate taskId and viewerId
@@ -222,11 +222,17 @@ export const sendForEditing = async (req, res) => {
       {
         $set: {
           status: "editing_required",
-          viewerComment: comment,
-          viewerCommentDate: new Date()
-        }
+        },
+        $push: {
+          viewerComments: {
+            $each: comments.map(comment => ({
+              comment: comment.text,
+              date: comment.date || new Date(),
+            })),
+          },
+        },
       },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!task) {
