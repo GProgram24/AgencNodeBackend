@@ -113,6 +113,68 @@ export const removeContent = async (req, res) => {
   }
 }
 
+// Controller to fetch a specific content
+export const getContent = async (req, res) => {
+  try {
+    const { userRoleId, taskId } = req.params;
+
+    // Validate userRoleId and taskId
+    if (!mongoose.isValidObjectId(userRoleId) || !mongoose.isValidObjectId(taskId)) {
+      return res.status(400).json({ message: "Invalid user role ID or task ID." });
+    }
+
+    // Find the task by ID and check if userRoleId is involved
+    const task = await Task.findOne({
+      _id: taskId,
+      $or: [
+        { creator: userRoleId },
+        { vettedBy: userRoleId },
+        { editedBy: userRoleId }
+      ]
+    })
+      .populate([
+        { path: "creator", select: "name" },
+        { path: "vettedBy", select: "name" },
+        { path: "editedBy", select: "name" },
+        { path: "product", select: "name" },
+        { path: "targetAudience", select: "-productServiceId -createdAt -updatedAt" }
+      ]);
+
+    if (!task) {
+
+      // Fetch parent of the user i.e. creator and check if it is same as the creator of task
+      // User can be either viewer or editor
+      // Below, after fetching the task, if task is found, we have the creator id, we need to check if it is parent of viewer or editor for given id
+      // To be added later, or immediately if requirement is raised
+
+      // Perform additional checks to determine the specific reason for failure
+      const taskExists = await Task.findById(taskId);
+      if (!taskExists) {
+        return res.status(404).json({ message: "Task not found." });
+      }
+
+      const isUserAuthorized = (
+        taskExists.creator.toString() === userRoleId ||
+        taskExists.vettedBy?.toString() === userRoleId ||
+        taskExists.editedBy?.toString() === userRoleId
+      );
+
+      if (!isUserAuthorized) {
+        return res.status(403).json({ message: "You are not authorized to view this task." });
+      }
+
+      // If none of the above, return a generic error (should not usually reach here)
+      return res.status(500).json({ message: "Failed to retrieve task due to unknown error." });
+    }
+
+    // If successful, return the task
+    return res.status(200).json({ task });
+  } catch (error) {
+    console.log("Error in getting content:", error);
+    res.status(500).json({ message: "Failed to retrieve task content." });
+  }
+};
+
 // Publish content
 export const publishTask = async (req, res) => {
   try {

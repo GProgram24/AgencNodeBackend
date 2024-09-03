@@ -22,7 +22,7 @@ const projectSchema = new mongoose.Schema(
     }],
     creator: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the creator who manages the project
+      ref: "Creator", // Reference to the creator who manages the project
       required: true,
     }
   },

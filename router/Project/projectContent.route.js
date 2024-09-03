@@ -2,6 +2,7 @@ import express from "express";
 import {
     taskCreationAndAddToProject,
     removeContent,
+    getContent
 } from "../../controller/Project/projectContent.controller.js";
 import {
     fetchUnacceptedTasksForEditor,
@@ -22,6 +23,9 @@ const router = express.Router();
 // Routes for task creation and content management in a project
 router.post("/:projectId/task", taskCreationAndAddToProject);
 router.delete("/:projectId/tasks/:taskId", removeContent);
+
+// Route for fetching specific task
+router.get("/:userRoleId/task/:taskId",getContent);
 
 // Routes for editor functionalities
 router.get("/tasks/editing-required/:editorId", fetchUnacceptedTasksForEditor);
