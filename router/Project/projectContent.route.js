@@ -2,7 +2,8 @@ import express from "express";
 import {
     taskCreationAndAddToProject,
     removeContent,
-    getContent
+    getContent,
+    dashboardAnalytics
 } from "../../controller/Project/projectContent.controller.js";
 import {
     fetchUnacceptedTasksForEditor,
@@ -39,5 +40,8 @@ router.get("/tasks/viewer/:viewerId", fetchAcceptedTasksForViewer);
 router.post("/tasks/:taskId/accept/viewer/:viewerId", acceptTaskByViewer);
 router.post("/tasks/:taskId/approve/viewer/:viewerId", approveTaskByViewer);
 router.post("/tasks/:taskId/send-for-editing/:viewerId", sendForEditing);
+
+// Route for dashboard analytics
+router.get("/dashboard/:userType/:userRoleId", dashboardAnalytics);
 
 export default router;

@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Project from "../../model/Project/project.model.js";
 import Task from "../../model/Project/task.model.js";
+import Viewer from "../../model/User/viewer.model.js";
+import Editor from "../../model/User/editor.model.js";
 
 // Controller to handle task creation and adding to project
 export const taskCreationAndAddToProject = async (req, res) => {
@@ -172,6 +174,212 @@ export const getContent = async (req, res) => {
   } catch (error) {
     console.log("Error in getting content:", error);
     res.status(500).json({ message: "Failed to retrieve task content." });
+  }
+};
+
+// Controller for dashboard analytics data
+export const dashboardAnalytics = async (req, res) => {
+  const taskRoles = {
+    editor: "editedBy",
+    viewer: "vettedBy",
+    creator: "creator"
+  }
+  const userRoleCollection = {
+    viewer: Viewer,
+    editor: Editor
+  }
+  try {
+    const { userType, userRoleId } = req.params;
+    const taskRole = taskRoles[userType];
+
+    // Validate input
+    if (!userType || !mongoose.isValidObjectId(userRoleId)) {
+      return res.status(422).json({ message: "Invalid user role id or missing query parameters." });
+    }
+
+    // Check if usertype is valid
+    if (!taskRole) {
+      return res.status(400).json({ message: "Invalid userType." });
+    }
+
+    if (taskRole !== "creator") {
+      const userCollection = userRoleCollection[userType];
+
+      // Fetch the parentId (creatorId) from the usertype model
+      const user = await userCollection.findOne({ _id: userRoleId }).select("parentId");
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const creatorId = user.parentId;
+
+      // Aggregate query 
+      if (taskRole == "vettedBy") {
+        const taskCounts = await Task.aggregate([
+          {
+            $match: {
+              creator: new mongoose.Types.ObjectId(creatorId), // Match tasks for the creator's parentId
+            },
+          },
+          {
+            $facet: {
+              // Separate tasks into different status sets
+              pendingApproval: [
+                {
+                  $match: {
+                    status: "pending_approval", // Only consider tasks with pending_approval status
+                  },
+                },
+                {
+                  $group: {
+                    _id: {
+                      accepted: { $ne: ["$vettedBy", null] }, // Check if vettedBy is not null (accepted) or null (unaccepted)
+                    },
+                    count: { $sum: 1 }, // Count the tasks in each group
+                  },
+                },
+                {
+                  $project: {
+                    accepted: "$_id.accepted", // Show whether the task was accepted
+                    count: 1,
+                    _id: 0, // Remove _id
+                  },
+                },
+              ],
+              otherStatuses: [
+                {
+                  $match: {
+                    status: { $ne: "pending_approval" }, // Match tasks with statuses other than pending_approval
+                    vettedBy: new mongoose.Types.ObjectId(userRoleId), // Only tasks accepted by this viewer
+                  },
+                },
+                {
+                  $group: {
+                    _id: "$status", // Group by status
+                    count: { $sum: 1 }, // Count the tasks
+                  },
+                },
+                {
+                  $project: {
+                    status: "$_id", // Rename _id to status
+                    count: 1,
+                    _id: 0, // Remove _id
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $project: {
+              pendingApproval: 1,
+              otherStatuses: 1,
+            },
+          },
+        ]);
+
+        return res.status(200).json({ taskCounts });
+
+      } else {
+        const taskCounts = await Task.aggregate([
+          {
+            $match: {
+              creator: new mongoose.Types.ObjectId(creatorId), // Match tasks for the creator's parentId
+              vettedBy: { $ne: null }, // Ensure the task has been accepted by a viewer
+            },
+          },
+          {
+            $facet: {
+              editingRequired: [
+                {
+                  $match: {
+                    status: "editing_required", // Only consider tasks with "editing_required" status
+                  },
+                },
+                {
+                  $group: {
+                    _id: {
+                      accepted: { $ne: ["$editedBy", null] }, // Check if editedBy is not null (accepted) or null (unaccepted)
+                      isAcceptedByEditor: { $eq: ["$editedBy", new mongoose.Types.ObjectId(userRoleId)] }, // Check if editedBy matches editor ID
+                    },
+                    count: { $sum: 1 }, // Count the tasks in each group
+                  },
+                },
+                {
+                  $project: {
+                    accepted: "$_id.accepted", // Show whether the task was accepted by any editor
+                    isAcceptedByEditor: "$_id.isAcceptedByEditor", // Show if the task was accepted by the specific editor
+                    count: 1,
+                    _id: 0, // Remove _id
+                  },
+                },
+              ],
+              otherStatuses: [
+                {
+                  $match: {
+                    status: { $in: ["approved", "published"] }, // Match tasks with statuses approved or published
+                    editedBy: new mongoose.Types.ObjectId(userRoleId), // Only tasks accepted by this editor
+                  },
+                },
+                {
+                  $group: {
+                    _id: "$status", // Group by status
+                    count: { $sum: 1 }, // Count the tasks
+                  },
+                },
+                {
+                  $project: {
+                    status: "$_id", // Rename _id to status
+                    count: 1,
+                    _id: 0, // Remove _id
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $project: {
+              editingRequired: 1,
+              otherStatuses: 1,
+            },
+          },
+        ]);
+
+        return res.status(200).json({ taskCounts });
+
+      }
+
+    } else {
+      // Aggregate query to count tasks by status for the creator
+      const taskCounts = await Task.aggregate([
+        {
+          $match: {
+            creator: new mongoose.Types.ObjectId(userRoleId), // Match tasks for the creator
+          },
+        },
+        {
+          $group: {
+            _id: "$status", // Group by task status
+            count: { $sum: 1 }, // Count the number of tasks for each status
+          },
+        },
+        {
+          $project: {
+            status: "$_id", // Rename _id to status
+            count: 1,
+            _id: 0, // Remove _id field
+          },
+        },
+      ]);
+
+      // Send response with task counts grouped by status
+      return res.status(200).json({ taskCounts });
+    }
+
+
+  } catch (error) {
+    console.log("Error in dashboard anaytics data controller:", error);
+    return res.status(500).json({ message: "Server error" });
+
   }
 };
 
