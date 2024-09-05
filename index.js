@@ -14,7 +14,8 @@ import checkAvailability from "./router/checkAvailability.route.js";
 import brandHierarchy from "./router/BrandArchitecture/brandArchitecture.route.js";
 import productSetup from "./router/BrandArchitecture/productDetails.router.js";
 import platformAccess from "./router/platformAccess.router.js";
-import taskCreation from "./router/Project/task.route.js";
+import projectContentRoute from "./router/Project/projectContent.route.js";
+import projectRoute from "./router/Project/project.route.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
@@ -66,7 +67,8 @@ app.use("/api/product", productSetup);
 app.use("/api/platform", platformAccess);
 app.use("/api/content", fastAPIHandler);
 app.post("/api/task", getSampleTestingTask);
-app.use("/api/project", taskCreation);
+app.use("/api/projects", projectRoute);
+app.use("/api/projects", projectContentRoute);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 // web-socket

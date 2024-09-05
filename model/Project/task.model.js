@@ -1,10 +1,25 @@
 import mongoose from "mongoose";
 
+const commentSchema = new mongoose.Schema({
+  comment: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  }
+});
+
 const taskSchema = new mongoose.Schema(
   {
     content: {
       type: String,
       required: true,
+    },
+    finalContent: {
+      type: String,
+      default: null,
     },
     status: {
       type: String,
@@ -19,22 +34,22 @@ const taskSchema = new mongoose.Schema(
     },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Creator",
       required: true,
     },
     vettedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Viewer",
       default: null,
     },
     editedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Editor",
       default: null,
     },
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductServiceMeta",
+      ref: "ProductService",
       required: true,
     },
     targetAudience: {
@@ -46,6 +61,20 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    touchpoint: {
+      type: String,
+      required: true,
+    },
+    goal: {
+      type: String,
+      required: true,
+    },
+    tone: {
+      type: String,
+      required: true,
+    },
+    viewerComments: [commentSchema],
+    editorComments: [commentSchema],
   },
   { timestamps: true }
 );
