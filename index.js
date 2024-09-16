@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
 import http from "http";
+import { Server } from 'socket.io';
 
 import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
@@ -19,7 +20,7 @@ import projectRoute from "./router/Project/project.route.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
-import { setupWebSockets } from "./controller/fastAPI/webSocketHandler.js";
+import websocketRoutes from "./router/WebSocket/websocket.route.js";
 
 dotenv.config();
 
@@ -28,6 +29,11 @@ const PORT = process.env.PORT;
 
 // HTTP server created from the Express app
 const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ["http://127.0.0.1:5500","http://localhost:5173",]
+  },
+});
 
 // CORS configuration
 const allowedOrigins = [
@@ -35,7 +41,7 @@ const allowedOrigins = [
   "https://agenc-frontend.vercel.app",
 ];
 
-// // Middleware
+// Middleware
 app.use(bodyParser.json());
 app.use(logger("dev"));
 app.use(
@@ -72,7 +78,7 @@ app.use("/api/projects", projectContentRoute);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 // web-socket
-setupWebSockets(server);
+websocketRoutes(io);
 
 
 // MongoDB Connection
@@ -83,12 +89,12 @@ mongoose
     // to keep free server up
     // Note: uncomment below code only when pushing on server, do not use on localhost
     setInterval(async () => {
-        const response = await fetch("https://agencnodebackend.onrender.com/");
-        const response2 = await fetch("https://agencpythonbackend-nm74.onrender.com/");
-        console.log(await response.json());
-        console.log("FastAPI:", await response2.json());
+      const response = await fetch("https://agencnodebackend.onrender.com/");
+      const response2 = await fetch("https://agencpythonbackend-nm74.onrender.com/");
+      console.log(await response.json());
+      console.log("FastAPI:", await response2.json());
     }, 600000)
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
