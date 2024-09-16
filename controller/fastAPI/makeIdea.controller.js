@@ -61,10 +61,7 @@ export const makeIdea = async (req, res) => {
       // Send a POST request to FastAPI
       const response = await axios.post(
         `${process.env.FASTAPI_SERVER}/idea`,
-        postData,
-        {
-          params: { type: "generate" },
-        }
+        postData
       );
       return res.status(200).send(response.data);
     } catch (error) {
