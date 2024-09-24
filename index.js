@@ -20,7 +20,7 @@ import projectRoute from "./router/Project/project.route.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
-import websocketRoutes from "./router/WebSocket/websocket.route.js";
+import { setupWebSockets } from "./controller/fastAPI/webSocketHandler.js";
 
 dotenv.config();
 
@@ -78,7 +78,7 @@ app.use("/api/projects", projectContentRoute);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 // web-socket
-websocketRoutes(io);
+setupWebSockets(server);
 
 
 // MongoDB Connection
@@ -86,14 +86,6 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to MongoDB");
-    // to keep free server up
-    // Note: uncomment below code only when pushing on server, do not use on localhost
-    setInterval(async () => {
-      const response = await fetch("https://agencnodebackend.onrender.com/");
-      const response2 = await fetch("https://agencpythonbackend-nm74.onrender.com/");
-      console.log(await response.json());
-      console.log("FastAPI:", await response2.json());
-    }, 600000)
     server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
