@@ -18,13 +18,17 @@ const websocketRoutes = (io) => {
     });
 
     // Namespace for handling brainstorm functionalities
-    const brainstormNamespace = io.of('/api/content/brainstorm');
+    const brainstormNamespace = io.of('/api/content/brainstorm'); // ?userId=...
 
     brainstormNamespace.on('connection', (socket) => {
         console.log('Client connected to brainstorm namespace:', socket.id);
-
+        // Access query parameters from the socket connection
+        const queryParams = socket.handshake.query;
+        const userId = queryParams.userId;
+        console.log(`Basis: ${userId}`);
+        
         // Handle brainstorm-related events
-        brainstormController(socket);
+        brainstormController(socket, userId);
 
         socket.on('disconnect', () => {
             console.log('Client disconnected from brainstorm namespace:', socket.id);
