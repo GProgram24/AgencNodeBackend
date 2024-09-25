@@ -6,12 +6,17 @@ dotenv.config();
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';
 
 // Brainstorm connection handler
-export const brainstormController = (socket) => {
+export const brainstormController = (socket, userId) => {
   // Idea setup event handler
   socket.on('initialContext', async (message) => {
     console.log(`Initial message received in /brainstorm from ${socket.id}: ${message}`);
     try {
-      const response = await axios.post(`${FASTAPI_URL}/brainstorm/init`, { message });
+      const response = await axios.post(`${FASTAPI_URL}/brainstorm/init`, {
+        user_id: userId, // User id to manage memory chain on fastapi
+        idea_basis: message.ideaBasis,
+        campaign_focus: message.campaignFocus,
+        basis: message.basis // To select template on fastapi
+      });
       socket.emit('initialContextResponse', response.data);
     } catch (error) {
       console.error('Error in initialContext:', error);
@@ -23,7 +28,10 @@ export const brainstormController = (socket) => {
   socket.on('selectIdea', async (ideaData) => {
     console.log(`Idea selection received in /brainstorm from ${socket.id}: ${ideaData}`);
     try {
-      const response = await axios.post(`${FASTAPI_URL}/brainstorm/select-idea`, { ideaData });
+      const response = await axios.post(`${FASTAPI_URL}/brainstorm/select-idea`, {
+        user_id: userId, // User id to manage memory chain on fastapi
+        idea_id: ideaData.selectedIdeaId
+      });
       socket.emit('selectIdeaResponse', response.data);
     } catch (error) {
       console.error('Error in selectIdea:', error);
@@ -35,7 +43,10 @@ export const brainstormController = (socket) => {
   socket.on('feedback', async (feedbackData) => {
     console.log(`Feedback received in /brainstorm from ${socket.id}: ${feedbackData}`);
     try {
-      const response = await axios.post(`${FASTAPI_URL}/brainstorm/feedback`, { feedbackData });
+      const response = await axios.post(`${FASTAPI_URL}/brainstorm/feedback`, {
+        user_id: userId, // User id to manage memory chain on fastapi
+        feedback: feedbackData.feedback
+      });
       socket.emit('feedbackResponse', response.data);
     } catch (error) {
       console.error('Error in feedback:', error);
