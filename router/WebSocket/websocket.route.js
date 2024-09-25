@@ -26,12 +26,21 @@ const websocketRoutes = (io) => {
         const queryParams = socket.handshake.query;
         const userId = queryParams.userId;
         console.log(`Basis: ${userId}`);
-        
+
         // Handle brainstorm-related events
         brainstormController(socket, userId);
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
             console.log('Client disconnected from brainstorm namespace:', socket.id);
+            try {
+                // Make request to FastAPI to clear user's memory
+                const response = await axios.delete(`${FASTAPI_URL}/brainstorm/delete-memory`, {
+                    user_id: userId
+                });
+                console.log(response.data.message);
+            } catch (error) {
+                console.error('Error deleting user memory:', error.message);
+            }
         });
     });
 };
