@@ -9,7 +9,6 @@ const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';
 export const brainstormController = (socket, userId) => {
   // Idea setup event handler
   socket.on('initialContext', async (message) => {
-    console.log(`Initial message received in /brainstorm from ${socket.id}: ${message}`);
     try {
       const response = await axios.post(`${FASTAPI_URL}/brainstorm/init`, {
         user_id: userId, // User id to manage memory chain on fastapi
@@ -26,7 +25,6 @@ export const brainstormController = (socket, userId) => {
 
   // Idea selection event handler
   socket.on('selectIdea', async (ideaData) => {
-    console.log(`Idea selection received in /brainstorm from ${socket.id}: ${ideaData}`);
     try {
       const response = await axios.post(`${FASTAPI_URL}/brainstorm/select-idea`, {
         user_id: userId, // User id to manage memory chain on fastapi
@@ -41,7 +39,6 @@ export const brainstormController = (socket, userId) => {
 
   // Feedback event handler
   socket.on('feedback', async (feedbackData) => {
-    console.log(`Feedback received in /brainstorm from ${socket.id}: ${feedbackData}`);
     try {
       const response = await axios.post(`${FASTAPI_URL}/brainstorm/feedback`, {
         user_id: userId, // User id to manage memory chain on fastapi
