@@ -1,5 +1,11 @@
+import axios from "axios";
+import dotenv from "dotenv";
+
 import { contentEditController } from "../../controller/fastAPI/makeIdeaEdit.controller.js";
 import { brainstormController } from "../../controller/fastAPI/brainstorming.controller.js";
+
+dotenv.config();
+const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';
 
 const websocketRoutes = (io) => {
 
@@ -33,9 +39,9 @@ const websocketRoutes = (io) => {
         socket.on('disconnect', async () => {
             console.log('Client disconnected from brainstorm namespace:', socket.id);
             try {
-                // Make request to FastAPI to clear user's memory
+                // Make request to FastAPI to delete user's memory
                 const response = await axios.delete(`${FASTAPI_URL}/brainstorm/delete-memory`, {
-                    user_id: userId
+                    params: { user_id: userId }
                 });
                 console.log(response.data.message);
             } catch (error) {
