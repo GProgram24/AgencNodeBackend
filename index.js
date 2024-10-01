@@ -20,6 +20,8 @@ import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.fun
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
 import { setupWebSockets } from "./controller/fastAPI/webSocketHandler.js";
+import oauthRoutes from "./router/Platform/OAuthConfigure.route.js";
+import oauthCallbackRoutes from "./router/Platform/OAuthCallback.route.js";
 
 dotenv.config();
 
@@ -71,9 +73,10 @@ app.use("/api/projects", projectRoute);
 app.use("/api/projects", projectContentRoute);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
+app.use("/api/oauth", oauthRoutes);
+app.use("/api", oauthCallbackRoutes);
 // web-socket
 setupWebSockets(server);
-
 
 // MongoDB Connection
 mongoose
