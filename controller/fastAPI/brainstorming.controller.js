@@ -7,7 +7,7 @@ const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';
 
 // Brainstorm connection handler
 export const brainstormController = (socket, userId) => {
-  // Idea setup event handler
+  // Chat setup event handler
   socket.on('initialContext', async (message) => {
     try {
       const response = await axios.post(`${FASTAPI_URL}/brainstorm/init`, {
