@@ -1,4 +1,5 @@
 // This schema has not been tested yet. First test and then use it.
+import mongoose from "mongoose";
 
 const platformAccessTokenSchema = new mongoose.Schema(
   {
