@@ -23,6 +23,7 @@ import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.functi
 import websocketRoutes from "./router/WebSocket/websocket.route.js";
 import oauthRoutes from "./router/Platform/OAuthConfigure.route.js";
 import oauthCallbackRoutes from "./router/Platform/OAuthCallback.route.js";
+import { restrictLiteAccountMiddleware } from "./middleware/restrictLiteAccount.middleware.js";
 
 dotenv.config();
 
@@ -67,16 +68,16 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRouter);
 app.use("/api/creator", setCreator);
-app.use("/api/custodian", setCustodian);
-app.use("/api/collaborator", setEditorViewer);
+app.use("/api/custodian", restrictLiteAccountMiddleware(), setCustodian);
+app.use("/api/collaborator", restrictLiteAccountMiddleware(), setEditorViewer);
 app.use("/api/check", checkAvailability);
 app.use("/api/brand", brandHierarchy);
 app.use("/api/product", productSetup);
 app.use("/api/platform", platformAccess);
 app.use("/api/content", fastAPIHandler);
-app.post("/api/task", getSampleTestingTask);
-app.use("/api/projects", projectRoute);
-app.use("/api/projects", projectContentRoute);
+app.post("/api/task", restrictLiteAccountMiddleware(), getSampleTestingTask);
+app.use("/api/projects", restrictLiteAccountMiddleware(), projectRoute);
+app.use("/api/projects", restrictLiteAccountMiddleware(), projectContentRoute);
 // to update onboarding progress, keep as last route
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 app.use("/api/oauth", oauthRoutes);
