@@ -8,12 +8,16 @@ const commentSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now,
-  }
+  },
 });
 
 const taskSchema = new mongoose.Schema(
   {
-    promptId: {type: new mongoose.Schema.Types.ObjectId, required: true},
+    promptId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Prompt",
+    },
     content: {
       type: String,
       required: true,
