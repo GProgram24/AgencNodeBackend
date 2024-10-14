@@ -1,5 +1,8 @@
+// This code has not been tested yet after integrating mongodb schema for saving the tokens. First test this code and then push to production.
+
 import axios from "axios";
 import dotenv from "dotenv";
+import Token from "../../models/platformAccessToken.model.js"; // Import the Token model
 dotenv.config();
 
 export const handleLinkedInCallback = async (req, res) => {
@@ -29,10 +32,30 @@ export const handleLinkedInCallback = async (req, res) => {
     );
 
     const accessToken = tokenResponse.data.access_token;
+    const refreshToken = tokenResponse.data.refresh_token; // LinkedIn usually provides a refresh token here
+    const expiresIn = tokenResponse.data.expires_in; // Expiry time in seconds
+    const expiresAt = new Date(Date.now() + expiresIn * 1000); // Calculate the expiration date
+
     console.log("Access token obtained:", accessToken);
 
-    // Here, you would typically save the token securely (e.g., in a database)
-    // For now, we'll just send it back to the client
+    // Save the token data to the database
+    const userId = req.user._id; // Assuming `req.user` contains the authenticated user's ID
+    const platform = "linkedin"; // Platform identifier
+
+    // Upsert the token in the database (update if it exists, otherwise create a new one)
+    await Token.findOneAndUpdate(
+      { userId, platform }, // Search parameter for updating the collection
+      {
+        accessToken,
+        refreshToken, // Store the refresh token
+        expiresAt,
+        platform,
+        userId,
+      },
+      { upsert: true, new: true }
+    );
+
+    // Redirect to the frontend with success status
     res.redirect(
       `http://localhost:5173/integrate_platforms?status=success&platform=linkedin`
     );
