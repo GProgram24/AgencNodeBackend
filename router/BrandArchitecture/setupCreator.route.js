@@ -3,6 +3,6 @@ import { setupCreator } from "../../controller/BrandArchitecture/setupCreator.Co
 
 const router = express.Router();
 
-router.post("/", setupCreator);
+router.post("/:accountType", setupCreator);
 
 export default router;
