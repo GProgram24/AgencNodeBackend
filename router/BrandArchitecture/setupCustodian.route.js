@@ -3,6 +3,7 @@ import { setupCustodian } from "../../controller/BrandArchitecture/setupCustodia
 
 const router = express.Router();
 
-router.post("/", setupCustodian);
+// lite or pro can be passed in the route parameter based on the accountType
+router.post("/:accountType", setupCustodian);
 
 export default router;
