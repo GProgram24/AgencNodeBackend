@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import dotenv from "dotenv";
-import Token from "../../models/platformAccessToken.model.js"; // Import the Token model
+import Token from "../../../model/platform/platformAccessToken.model.js";
 dotenv.config();
 
 export const handleLinkedInCallback = async (req, res) => {
