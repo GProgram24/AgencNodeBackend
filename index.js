@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
 import http from "http";
+import { Server } from "socket.io";
 
 import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
@@ -19,7 +20,7 @@ import projectRoute from "./router/Project/project.route.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
-import { setupWebSockets } from "./controller/fastAPI/webSocketHandler.js";
+import websocketRoutes from "./router/WebSocket/websocket.route.js";
 import oauthRoutes from "./router/Platform/OAuthConfigure.route.js";
 import oauthCallbackRoutes from "./router/Platform/OAuthCallback.route.js";
 
@@ -30,6 +31,11 @@ const PORT = process.env.PORT;
 
 // HTTP server created from the Express app
 const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ["http://127.0.0.1:5500", "http://localhost:5173"],
+  },
+});
 
 // CORS configuration
 const allowedOrigins = [
@@ -37,7 +43,7 @@ const allowedOrigins = [
   "https://agenc-frontend.vercel.app",
 ];
 
-// // Middleware
+// Middleware
 app.use(bodyParser.json());
 app.use(logger("dev"));
 app.use(
@@ -76,14 +82,14 @@ app.patch("/api/onboarding/progress", updateOnboardingProgress);
 app.use("/api/oauth", oauthRoutes);
 app.use("/api", oauthCallbackRoutes);
 // web-socket
-setupWebSockets(server);
+websocketRoutes(io);
 
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to MongoDB");
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
