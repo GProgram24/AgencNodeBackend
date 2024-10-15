@@ -64,7 +64,7 @@ export const loginUser = async (req, res) => {
 
       // User authenticated, generate token with accountType
       const token = jwt.sign({ userId: user._id, accountType }, SECRET_KEY, {
-        expiresIn: "1h",
+        expiresIn: "4h",
       });
 
       // Return the token and accountType in the response
