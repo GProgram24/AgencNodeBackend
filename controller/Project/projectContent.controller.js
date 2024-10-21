@@ -8,10 +8,11 @@ import Editor from "../../model/User/editor.model.js";
 export const taskCreationAndAddToProject = async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { creatorId, contentPieces, product, targetAudience, idea, touchpoint, goal, tone } = req.body;
+    const { dataId, creatorId, contentPieces, product, targetAudience, idea, touchpoint, goal, tone } = req.body;
 
     // Validate input
     if (
+      !dataId ||
       !creatorId ||
       !Array.isArray(contentPieces) ||
       contentPieces.length === 0 ||
@@ -28,6 +29,7 @@ export const taskCreationAndAddToProject = async (req, res) => {
     // Validate that projectId, creatorId, product, and targetAudience are valid ObjectIds
     if (
       !mongoose.isValidObjectId(projectId) ||
+      !mongoose.isValidObjectId(dataId) ||
       !mongoose.isValidObjectId(creatorId) ||
       !mongoose.isValidObjectId(product) ||
       !mongoose.isValidObjectId(targetAudience)
@@ -43,6 +45,7 @@ export const taskCreationAndAddToProject = async (req, res) => {
 
     // Loop through the content pieces and create a task document for each
     const tasks = contentPieces.map((contentPiece) => ({
+      promptId: dataId,
       content: contentPiece.text,
       creator: creatorId,
       product,
