@@ -9,7 +9,7 @@ export const restrictLiteAccountMiddleware = () => {
     try {
       // Get token from headers
       const token = req.headers.authorization?.split(" ")[1];
-      console.log("Recived token: ", token);
+      console.log("Received token: ", token);
 
       if (!token) {
         return res
@@ -20,12 +20,19 @@ export const restrictLiteAccountMiddleware = () => {
       // Verify and decode token
       const decodedToken = jwt.verify(token, SECRET_KEY);
 
-      // Check account type; Pro accounts have access to everything
-      if (decodedToken.accountType === "lite") {
-        return res
-          .status(403)
-          .json({ message: "Access restricted. Please upgrade to AgenC Pro." });
+      // Check account type; allow access for both Lite and Pro
+      if (
+        decodedToken.accountType !== "lite" &&
+        decodedToken.accountType !== "pro"
+      ) {
+        return res.status(403).json({ message: "Invalid account type." });
       }
+
+      // Attach accountType and user details to req for further processing
+      req.user = {
+        accountType: decodedToken.accountType,
+        userId: decodedToken.userId, // Assuming userId is part of the token
+      };
 
       next();
     } catch (error) {
