@@ -162,6 +162,11 @@ const websocketRoutes = (io) => {
 
         // Select user model bases on request received
         const UserTypeModel = userTypeModels[userType.toLowerCase()];
+        if(!UserTypeModel){
+            socket.emit('error', { message: "Invalid type." });
+            socket.disconnect(true);
+            return;
+        }
         // Fetch user details from database using role and userid
         const userCheck = await UserTypeModel.findById(userId);
         // If user is not found, do not allow to access functionality
