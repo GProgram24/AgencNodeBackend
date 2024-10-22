@@ -1,6 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
-
+import Task from "../../model/Project/task.model.js";
 dotenv.config();
 
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';
@@ -33,6 +33,27 @@ export const contentEditController = (socket, taskId, editorId) => {
     } catch (error) {
       console.error('Error in feedback:', error);
       socket.emit('error', { message: 'Error processing feedback' });
+    }
+  });
+
+  // Finalize content event handler
+  socket.on('finalize', async (finalizeData) => {
+    try {
+      // Update content and change status to approved
+      const finalContent = finalizeData.content;
+      const updateTaskContent = await Task.findByIdAndUpdate(taskId, { $set: { finalContent, status:"approved" } }, { new: true });
+
+      if (!updateTaskContent) {
+        socket.emit('error', { message: 'Task not found' });
+        return;
+      }
+
+      // Return status of task on successful updation and disconnect the socket connection
+      socket.emit('finalizeResponse', updateTaskContent.status);
+      socket.disconnect(true);
+    } catch (error) {
+      console.error('Error in finalizing:', error);
+      socket.emit('error', { message: 'Error in finalizing' });
     }
   });
 };
