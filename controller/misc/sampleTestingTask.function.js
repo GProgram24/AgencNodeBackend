@@ -8,6 +8,8 @@ import targetAudience from "../../model/targetAudience.model.js";
 
 // Function to assign verticals task based on accountType (Pro/Lite)
 export const divideSampleContentTask = async (brandName, accountType) => {
+  console.log("Recieved account type", accountType);
+
   try {
     // Get brandId
     if (brandName) {
@@ -40,7 +42,36 @@ export const divideSampleContentTask = async (brandName, accountType) => {
         };
       });
 
-      // Initialize vertical groups for the task assignment
+      // For Lite accounts, assign tasks only based on product * target audience (no verticals)
+      if (accountType === "lite") {
+        console.log(
+          "Lite account detected: Assigning product-target audience tasks to the creator."
+        );
+
+        const taskAssign = [];
+
+        // Create a task list based on products and target audiences
+        productsWithAudience.forEach((product) => {
+          product.targetAudience.forEach((audience) => {
+            taskAssign.push({
+              userId: creatorId, // Assign all tasks to the creator
+              task: {
+                productId: product.productId,
+                productName: product.productName,
+                targetAudience: [audience],
+              },
+            });
+          });
+        });
+
+        // Insert assigned tasks into the database
+        const assignInsertResponse = await SampleTesting.insertMany(taskAssign);
+        console.log(assignInsertResponse);
+
+        return "successful";
+      }
+
+      // For Pro accounts, proceed with vertical-based task assignment
       const verticalGroups = {
         longForm: [creatorId],
         automation: [creatorId],
@@ -48,7 +79,6 @@ export const divideSampleContentTask = async (brandName, accountType) => {
         community: [creatorId],
       };
 
-      // For Pro accounts, add editors and viewers to vertical groups
       if (accountType === "pro") {
         const editors = await Editor.find({ brandId: brand._id }).select([
           "_id",
@@ -82,46 +112,41 @@ export const divideSampleContentTask = async (brandName, accountType) => {
             }
           });
         });
-      } else if (accountType === "lite") {
-        // Explicit handling for Lite accounts: only the creator receives tasks
-        console.log(
-          "Lite account detected: All tasks will be assigned to the creator."
-        );
+
+        // Create a task list for assignment based on products and target audiences
+        const taskList = [];
+        productsWithAudience.forEach((product) => {
+          product.targetAudience.forEach((audience) => {
+            taskList.push({
+              productId: product.productId,
+              productName: product.productName,
+              targetAudience: [audience],
+            });
+          });
+        });
+
+        // Assign tasks to relevant users in a round-robin manner across verticals
+        const taskAssign = [];
+
+        Object.keys(verticalGroups).forEach((vertical) => {
+          const users = verticalGroups[vertical];
+          const nUsers = users.length;
+          let index = 0;
+          taskList.forEach((task) => {
+            taskAssign.push({
+              userId: users[index % nUsers],
+              task: task,
+            });
+            index += 1;
+          });
+        });
+
+        // Insert assigned tasks into the database
+        const assignInsertResponse = await SampleTesting.insertMany(taskAssign);
+        return "successful";
+      } else {
+        return "Invalid request";
       }
-
-      // Create a task list for assignment based on products and target audiences
-      const taskList = [];
-      productsWithAudience.forEach((product) => {
-        product.targetAudience.forEach((audience) => {
-          taskList.push({
-            productId: product.productId,
-            productName: product.productName,
-            targetAudience: [audience],
-          });
-        });
-      });
-
-      // Assign tasks to relevant users in a round-robin manner
-      const taskAssign = [];
-
-      Object.keys(verticalGroups).forEach((vertical) => {
-        const users = verticalGroups[vertical];
-        const nUsers = users.length;
-        let index = 0;
-        taskList.forEach((task) => {
-          taskAssign.push({
-            userId: users[index % nUsers],
-            task: task,
-          });
-          index += 1;
-        });
-      });
-
-      // Insert assigned tasks into the database
-      const assignInsertResponse = await SampleTesting.insertMany(taskAssign);
-      return "successful";
-    } else {
-      return "Invalid request";
     }
   } catch (error) {
     console.log("Error at assigning vertical tasks:", error);
@@ -131,7 +156,9 @@ export const divideSampleContentTask = async (brandName, accountType) => {
 
 export const getSampleTestingTask = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.query; // Get userId from query parameters
+    console.log(`Received user ID: ${userId}`);
+
     if (mongoose.isValidObjectId(userId)) {
       const tasks = await SampleTesting.find({ userId: userId });
       return res.status(200).json({ message: tasks });
@@ -140,6 +167,6 @@ export const getSampleTestingTask = async (req, res) => {
     }
   } catch (error) {
     console.log("Error at fetching sample testing task:", error);
-    res.json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
