@@ -2,6 +2,7 @@ import { Router } from "express";
 import { restrictLiteAccountMiddleware } from "../../middleware/restrictLiteAccount.middleware.js";
 import {
   divideSampleContentTask,
+  getCollaboratorsByVertical,
   getSampleTestingTask,
 } from "../../controller/misc/sampleTestingTask.function.js";
 
@@ -27,5 +28,7 @@ router.post(
 );
 
 router.get("/tasks", getSampleTestingTask);
+
+router.get("/collaborators/:brandName", getCollaboratorsByVertical);
 
 export const sampleTestingTaskRoutes = router;
