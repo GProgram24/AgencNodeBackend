@@ -112,11 +112,25 @@ export const sampleTestingController = (socket, userId) => {
     socket.on('feedback', async (feedbackData) => {
         try {
             // Send feedback to FastAPI for content regeneration
-            const response = await axios.post(`${FASTAPI_URL}/sample-content/feedback`, feedbackData, {
+            // feedbackData should contain product_id
+            const response = await axios.post(`${FASTAPI_URL}/sample-content/feedback`,
+                {
+                    product_id: feedbackData.productId,
+                    feedback: feedbackData.feedback,
+                    rating: feedbackData.rating,
+                    ...(feedbackData.selection && { selection: feedbackData.selection }) // Include selection only if it exists
+                }, {
                 params: { user_id: userId }
             });
 
-            socket.emit('feedbackResponse', response.data);
+            // Check if the response message indicates completion of sample testing
+            if (response.data == 'Sample testing completed') {
+                socket.emit('feedbackResponse', 'Sample testing completed');
+                socket.disconnect();  // Disconnect the socket as it's no longer needed
+            } else {
+                // Emit the feedback response data for further refinement
+                socket.emit('feedbackResponse', response.data);
+            }
         } catch (error) {
             console.error('Error in processing feedback:', error);
             socket.emit('error', { message: 'Error processing feedback' });
