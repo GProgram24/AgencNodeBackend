@@ -14,7 +14,7 @@ export const contentEditController = (socket, taskId, editorId) => {
         user_id: editorId, // User id to manage memory chain on fastapi
         task_id: taskId
       });
-      socket.emit('initialContextResponse', response.data);
+      socket.emit('initialContextResponse', response.data.detail);
     } catch (error) {
       console.error('Error in initialContext:', error);
       socket.emit('error', { message: 'Error processing initial context' });
@@ -29,7 +29,11 @@ export const contentEditController = (socket, taskId, editorId) => {
         feedback: feedbackData.feedback,
         selection: feedbackData?.selection || null
       });
-      socket.emit('feedbackResponse', response.data);
+      if (response.status == 200) {
+        socket.emit('feedbackResponse', response.data.response);
+      } else {
+        socket.emit('feedbackResponse', response.data.data);
+      }
     } catch (error) {
       console.error('Error in feedback:', error);
       socket.emit('error', { message: 'Error processing feedback' });
@@ -39,19 +43,18 @@ export const contentEditController = (socket, taskId, editorId) => {
   // Finalize content event handler
   socket.on('finalize', async (finalizeData) => {
     try {
-      // Update content and change status to approved
-      const finalContent = finalizeData.content;
-      const updateTaskContent = await Task.findByIdAndUpdate(taskId, { $set: { finalContent, status:"approved" } }, { new: true });
+      const response = await axios.post(`${FASTAPI_URL}/idea/edit/save`, {
+        user_id: editorId, // User id to manage memory chain on fastapi
+        task_id: taskId
+      });
 
-      if (!updateTaskContent) {
-        socket.emit('error', { message: 'Task not found' });
-        return;
+      socket.emit('finalizeResponse', response.data.detail);
+      // Disconnect socket since the edit is done and content is finalzed
+      if (response.status === 200) {
+        socket.disconnect(true);
       }
-
-      // Return status of task on successful updation and disconnect the socket connection
-      socket.emit('finalizeResponse', updateTaskContent.status);
-      socket.disconnect(true);
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error in finalizing:', error);
       socket.emit('error', { message: 'Error in finalizing' });
     }

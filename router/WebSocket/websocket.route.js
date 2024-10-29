@@ -29,9 +29,8 @@ const websocketRoutes = (io) => {
         
         // Extract task and editor id from query params for authorizarion and functionality
         const queryParams = socket.handshake.query;
-        const taskId = queryParams.taskId[3];
-        const editorId = queryParams.editorId[5];
-        console.log(taskId, editorId);
+        const taskId = queryParams.taskId;
+        const editorId = queryParams.editorId;
         
         // Check if request data is valid
         if (!taskId || !editorId) {
