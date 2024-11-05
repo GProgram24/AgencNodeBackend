@@ -1,6 +1,5 @@
 import axios from "axios";
 import dotenv from "dotenv";
-import Task from "../../model/Project/task.model.js";
 dotenv.config();
 
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';

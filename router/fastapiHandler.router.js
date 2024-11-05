@@ -1,5 +1,4 @@
 import express from "express";
-// import { sampleTesting } from "../controller/fastAPI/sampleTesting.controller.js"; // to be moved to web socket
 import { makeIdea } from "../controller/fastAPI/makeIdea.controller.js";
 
 const router = express.Router();
