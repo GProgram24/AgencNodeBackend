@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import logger from "morgan";
 import http from "http";
-import { Server } from 'socket.io';
+import { Server } from "socket.io";
 
 import authRouter from "./router/authentication/auth.route.js";
 import setCreator from "./router/BrandArchitecture/setupCreator.route.js";
@@ -20,7 +20,11 @@ import projectRoute from "./router/Project/project.route.js";
 import { updateOnboardingProgress } from "./controller/misc/onboardingUpdate.function.js";
 import fastAPIHandler from "./router/fastapiHandler.router.js";
 import { getSampleTestingTask } from "./controller/misc/sampleTestingTask.function.js";
+import { sampleTestingTaskRoutes } from "./router/misc/sampleTestingTask.route.js";
 import websocketRoutes from "./router/WebSocket/websocket.route.js";
+import oauthRoutes from "./router/Platform/OAuthConfigure.route.js";
+import oauthCallbackRoutes from "./router/Platform/OAuthCallback.route.js";
+import { restrictLiteAccountMiddleware } from "./middleware/restrictLiteAccount.middleware.js";
 
 dotenv.config();
 
@@ -65,21 +69,21 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRouter);
 app.use("/api/creator", setCreator);
-app.use("/api/custodian", setCustodian);
-app.use("/api/collaborator", setEditorViewer);
+app.use("/api/custodian", restrictLiteAccountMiddleware(), setCustodian);
+app.use("/api/collaborator", restrictLiteAccountMiddleware(), setEditorViewer);
 app.use("/api/check", checkAvailability);
 app.use("/api/brand", brandHierarchy);
 app.use("/api/product", productSetup);
 app.use("/api/platform", platformAccess);
 app.use("/api/content", fastAPIHandler);
-app.post("/api/task", getSampleTestingTask);
-app.use("/api/projects", projectRoute);
-app.use("/api/projects", projectContentRoute);
-// to update onboarding progress, keep as last route
+app.use("/api/projects", restrictLiteAccountMiddleware(), projectRoute);
+app.use("/api/projects", restrictLiteAccountMiddleware(), projectContentRoute);
+app.use("/api/sample-testing", sampleTestingTaskRoutes);
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
+app.use("/api/oauth", oauthRoutes);
+app.use("/api", oauthCallbackRoutes);
 // web-socket
 websocketRoutes(io);
-
 
 // MongoDB Connection
 mongoose

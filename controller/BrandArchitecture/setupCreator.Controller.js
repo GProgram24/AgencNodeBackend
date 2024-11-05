@@ -9,14 +9,40 @@ import Account from "../../model/Brand/account.model.js";
 
 export const setupCreator = async (req, res) => {
   const reqObj = req.body;
+  const accountType = req.params.accountType; // Fetch the accountType from route parameter
 
   if (!Array.isArray(reqObj) || reqObj.length === 0) {
     return res
       .status(422)
       .json({ message: "Invalid input. Please provide an array of objects." });
   }
+
   try {
-    // checking email already exist is not required since its is already checked via /check route
+    // Server-side check: For Lite accounts, only one creator for a single brand can be added
+    if (accountType === "lite") {
+      const accountName = reqObj[0].account;
+
+      // Fetch the account's ObjectId using the account name
+      const accountIdResponse = await Account.findOne({
+        name: accountName,
+      }).select("_id");
+
+      if (!accountIdResponse) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+
+      // Use the accountId (ObjectId) to check for an existing brand
+      const existingBrand = await Brand.findOne({
+        accountId: accountIdResponse._id,
+      });
+
+      if (existingBrand) {
+        return res.status(400).json({
+          message: "Lite accounts can only have one creator for one brand.",
+        });
+      }
+    }
+
     // Generate passwords for all users
     const passwords = passwordGenerator(reqObj.length);
 
@@ -31,7 +57,6 @@ export const setupCreator = async (req, res) => {
     const accountIdResponse = await Account.findOne({
       name: accountName,
     }).select("_id");
-    console.log(accountIdResponse);
 
     // Get custodian id from custodian collection for parentId field, using _id from account collection
     const custodianIdResponse = await Custodian.findOne({
@@ -51,10 +76,10 @@ export const setupCreator = async (req, res) => {
     const createUsersResponse = await User.insertMany(usersWithHashedPasswords);
     res.status(201).json({
       message: "Successful",
-      data: usersWithPasswords
+      data: usersWithPasswords,
     });
 
-    // Send email to users with their unhashed passwords
+    // Send email to users with their unhashed passwords (for both lite and pro)
     for (const user of usersWithPasswords) {
       await axios.post(`${process.env.MAIL_SERVER}/new-user`, {
         to: user.email,
@@ -86,11 +111,10 @@ export const setupCreator = async (req, res) => {
     const createBrandResponse = await Brand.insertMany(brandsObj);
   } catch (err) {
     console.log("Error during creator setup: " + err);
-    if(err.code == 11000){
+    if (err.code == 11000) {
       return res.status(400).json({ message: "User/Account exists" });
+    } else {
+      return res.status(500).json({ message: "Server error" });
     }
-    else{
-        return res.status(500).json({ message: "Server error" });
-    }
-}
+  }
 };
