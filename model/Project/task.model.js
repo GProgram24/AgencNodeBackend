@@ -13,11 +13,7 @@ const commentSchema = new mongoose.Schema({
 
 const taskSchema = new mongoose.Schema(
   {
-    promptId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "Prompt",
-    },
+    promptId: {type: mongoose.Schema.Types.ObjectId, required: true},
     content: {
       type: String,
       required: true,

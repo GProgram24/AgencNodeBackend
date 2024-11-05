@@ -1,11 +1,9 @@
 import express from "express";
-import { sampleTesting } from "../controller/fastAPI/sampleTesting.controller.js";
+// import { sampleTesting } from "../controller/fastAPI/sampleTesting.controller.js"; // to be moved to web socket
 import { makeIdea } from "../controller/fastAPI/makeIdea.controller.js";
 
 const router = express.Router();
 
-// Generate content for sample testing
-router.post("/sample", sampleTesting);
 // Generate content for make an idea feature
 router.post("/idea", makeIdea);
 // Handling invalid route for content
