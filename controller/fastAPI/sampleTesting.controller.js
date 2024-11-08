@@ -52,7 +52,6 @@ export const sampleTesting = async (req, res) => {
 }
 */
 
-
 import axios from "axios";
 import mongoose from "mongoose";
 import productServiceModel from "../../model/Brand/productService.model.js";
@@ -61,79 +60,124 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:7000';
+const FASTAPI_URL = "http://localhost:7000";
 const verticalList = ["longform", "performance", "community", "automation"];
 
 export const sampleTestingController = (socket, userId) => {
+  console.log(`User connected: ${userId}, Socket ID: ${socket.id}`);
 
-    // Initial content generation event handler
-    socket.on('init', async (initData) => {
-        const reqVertical = initData.vertical;
-        const vertical = reqVertical ? reqVertical.toLowerCase() : '';
+  // Initial content generation event handler
+  socket.on("init", async (initData) => {
+    console.log("Received 'init' event with data:", initData);
 
-        if (verticalList.includes(vertical) && (Object.keys(initData).length > 4 && mongoose.isValidObjectId(initData.productId))) {
-            try {
-                // Fetch product details using productId
-                const productParent = await productServiceModel.findById(initData.productId);
-                const productDetail = await productServiceMetaModel.findOne({ productServiceId: initData.productId });
+    const reqVertical = initData.vertical;
+    const vertical = reqVertical ? reqVertical.toLowerCase() : "";
 
-                // Data to send in the POST request
-                const postData = {
-                    vertical: vertical,
-                    platform_name: initData.platform,
-                    product_name: productParent.name,
-                    description: productDetail.description,
-                    feature: productDetail.feature,
-                    attributes: productDetail.attributes,
-                    usp: productDetail.usp,
-                    target_audience: initData.audienceName,
-                    age_group: `${initData.lowerAge}-${initData.upperAge}`,
-                    goals_and_needs: initData.goalsAndNeeds,
-                    pain_points: initData.painPoints,
-                    region: initData.region,
-                };
+    if (
+      verticalList.includes(vertical) &&
+      Object.keys(initData).length > 4 &&
+      mongoose.isValidObjectId(initData.productId)
+    ) {
+      console.log(`Valid 'init' request for vertical: ${vertical}`);
 
-                // Send a POST request to FastAPI for initial content generation
-                const response = await axios.post(`${FASTAPI_URL}/sample-content`, postData, {
-                    params: { user_id: userId }
-                });
+      try {
+        console.log(
+          `Fetching product details for productId: ${initData.productId}`
+        );
 
-                socket.emit('initResponse', response.data);
-            } catch (error) {
-                console.error('Error in generating initial content:', error);
-                socket.emit('error', { message: 'Error generating initial content' });
-            }
-        } else {
-            socket.emit('error', { message: 'Invalid request' });
-        }
-    });
+        // Fetch product details using productId
+        const productParent = await productServiceModel.findById(
+          initData.productId
+        );
+        const productDetail = await productServiceMetaModel.findOne({
+          productServiceId: initData.productId,
+        });
 
-    // Feedback event handler for content refinement
-    socket.on('feedback', async (feedbackData) => {
-        try {
-            // Send feedback to FastAPI for content regeneration
-            // feedbackData should contain product_id
-            const response = await axios.post(`${FASTAPI_URL}/sample-content/feedback`,
-                {
-                    product_id: feedbackData.productId,
-                    feedback: feedbackData.feedback,
-                    rating: feedbackData.rating,
-                    ...(feedbackData.selection && { selection: feedbackData.selection }) // Include selection only if it exists
-                }, {
-                params: { user_id: userId }
-            });
+        console.log("Fetched productParent:", productParent);
+        console.log("Fetched productDetail:", productDetail);
 
-            // Check if the response message indicates completion of sample testing
-            if (response.data == 'Sample testing completed') {
-                socket.emit('feedbackResponse', 'Sample testing completed');
-                socket.disconnect();  // Disconnect the socket as it's no longer needed
-            } else {
-                // Emit the feedback response data for further refinement
-                socket.emit('feedbackResponse', response.data);
-            }
-        } catch (error) {
-            console.error('Error in processing feedback:', error);
-            socket.emit('error', { message: 'Error processing feedback' });
-        }
-    });
+        // Data to send in the POST request
+        const postData = {
+          vertical: vertical,
+          platform_name: initData.platform,
+          product_name: productParent.name,
+          description: productDetail.description,
+          feature: productDetail.feature,
+          attributes: productDetail.attributes,
+          usp: productDetail.usp,
+          target_audience: initData.audienceName,
+          age_group: `${initData.lowerAge}-${initData.upperAge}`,
+          goals_and_needs: initData.goalsAndNeeds,
+          pain_points: initData.painPoints,
+          region: initData.region,
+        };
+
+        console.log("Sending POST request to FastAPI with data:", postData);
+
+        // Send a POST request to FastAPI for initial content generation
+        const response = await axios.post(
+          `${FASTAPI_URL}/sample-content`,
+          postData,
+          {
+            params: { user_id: userId },
+          }
+        );
+
+        console.log("Response from FastAPI:", response.data);
+
+        socket.emit("initResponse", response.data);
+      } catch (error) {
+        console.error(
+          "Error in generating initial content:",
+          error.response?.data || error.message
+        );
+        socket.emit("error", { message: "Error generating initial content" });
+      }
+    } else {
+      console.warn("Invalid 'init' request received.");
+      socket.emit("error", { message: "Invalid request" });
+    }
+  });
+
+  // Feedback event handler for content refinement
+  socket.on("feedback", async (feedbackData) => {
+    console.log("Received 'feedback' event with data:", feedbackData);
+
+    try {
+      const payload = {
+        product_id: feedbackData.productId,
+        feedback: feedbackData.feedback,
+        rating: feedbackData.rating,
+        ...(feedbackData.selection && { selection: feedbackData.selection }),
+      };
+
+      console.log("Payload sent to FastAPI:", payload);
+
+      const response = await axios.post(
+        `${FASTAPI_URL}/sample-content/feedback`,
+        payload,
+        { params: { user_id: userId } }
+      );
+
+      console.log("Response from FastAPI:", response.data);
+
+      if (response.data === "Sample testing completed") {
+        console.log("Sample testing completed. Disconnecting socket.");
+        socket.emit("feedbackResponse", "Sample testing completed");
+        socket.disconnect();
+      } else {
+        socket.emit("feedbackResponse", response.data);
+      }
+    } catch (error) {
+      console.error(
+        "Error in processing feedback:",
+        error.response?.data || error.message
+      );
+      socket.emit("error", { message: "Error processing feedback" });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`User disconnected: ${userId}, Socket ID: ${socket.id}`);
+  });
 };
