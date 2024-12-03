@@ -1,23 +1,4 @@
 import mongoose from "mongoose";
-
-const contentPieceSchema = new mongoose.Schema({
-    label: {
-      type: String,
-      required: true, // E.g., "Blog", "Social Media Post"
-    },
-    content: [
-      {
-        id: {
-          type: Number,
-          required: true,
-        },
-        text: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
-  });
   
   const creationSchema = new mongoose.Schema(
     {
@@ -52,7 +33,7 @@ const contentPieceSchema = new mongoose.Schema({
         ref: "User",
         required: true,
       },
-      contentPieces: [contentPieceSchema], // Array of content pieces with nested objects
+      contentPieces: [],
       createdAt: {
         type: Date,
         default: Date.now,
