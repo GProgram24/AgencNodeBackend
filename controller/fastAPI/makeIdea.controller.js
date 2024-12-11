@@ -85,10 +85,9 @@ export const makeIdea = async (req, res) => {
       
 
       // Parsed the data and extracted content from it to save.
-      const responseData = JSON.parse(response.data)
+      const responseData = response.data;
       console.log(responseData)
       const contentPieces = responseData.content;
-      console.log(contentPieces)
       const newCreation = new creationModel({
         creatorId,
         contentPieces: contentPieces,
@@ -104,10 +103,7 @@ export const makeIdea = async (req, res) => {
       console.log("content", newCreation.contentPieces)
 
       await newCreation.save()
-      return res.status(200).json({
-        data: response.data,
-        credits: req.remainingCredits
-      });
+      return res.status(200).send(response.data);
     } catch (error) {
       console.error("Error in generating idea content:", error);
       return res.status(500).json({ message: error.message });
@@ -120,27 +116,65 @@ export const makeIdea = async (req, res) => {
 
 
 
+export const getAllCreations = async (req, res) => {
+  const {creatorId} = req.query;
+  if(!creatorId){
+    return res.status(401).json({
+      message: "Creation ID not found"
+    })
+  } else if(!mongoose.isValidObjectId(creatorId)){
+    return res.status(401).json({
+      message: "Invalid creation ID"
+    })
+  }
+  try{
+     const creation = await creationModel.find({creatorId: creatorId})
+     if(!creation) return res.status(404).json({message: "Creator not found"})
+    const userCreations = creation.map((creation) => ({
+      id: creation._id,
+      idea: creation.idea,
+      inputs: creation.inputs,
+      contentPieces: creation.contentPieces,
+    }));
+      
+    return res.status(200).send(userCreations)
+  } catch(err){
+    console.error(err);
+    return res.status(500).json({message: err.message});
+  }
+}
 
-// few changes need to be made here as well.
 
-// export const getAllCreations = async (req, res) => {
-//   const {creationId} = req.params;
-//   if(!creationId){
-//     return res.status(401).json({
-//       message: "Creation ID not found"
-//     })
-//   } else if(!mongoose.isValidObjectId(creationId)){
-//     return res.status(401).json({
-//       message: "Invalid creation ID"
-//     })
-//   }
-//   try{
-//      const creation = await creationModel.findById(creationId)
-//      if(!creation) return res.status(404).json({message: "Creator not found"})
-//     return res.status(200).send(creation)
+export const getCreationDetails = async(req, res) => {
+  const {creationId} = req.query;
+  if(!creationId){
+    return res.status(401).json({
+      message: "Creation ID not found"
+    })
+  } else if(!mongoose.isValidObjectId(creationId)){
+    return res.status(401).json({
+      message: "Invalid creation ID"
+    })
+  }
 
-//   } catch(err){
-//     console.error(err);
-//     return res.status(500).json({message: err.message});
-//   }
-// }
+  try{
+    const creation = await creationModel.findById(creationId)
+    if(!creation){
+      return res.status(401).json({
+        message: "Creation not found"
+      })
+    }
+
+    const creationDetails = {
+      idea: creation.idea,
+      inputs: creation.inputs,
+      contentPieces: creation.contentPieces,
+    }
+
+    return res.status(200).send(creationDetails)
+  } catch(error){
+    console.error(err);
+    return res.status(500).json({message: err.message});
+  }
+
+}

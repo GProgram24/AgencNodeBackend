@@ -4,7 +4,6 @@ export const checkCredits = async (req, res, next) => {
     try {
         // few changes are needed to be done after the testing is complete
         const {creatorId: userId} = req.body;
-
         // commented out for testing purposes
         // if(!accountType || !userId){
         //     res.status(404).json({
@@ -40,8 +39,6 @@ export const checkCredits = async (req, res, next) => {
     
         userCredits.credits -= 1;
         await userCredits.save();
-    
-        req.remainingCredits = userCredits.credits;
     
         next();
     } catch (error) {
