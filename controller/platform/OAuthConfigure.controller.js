@@ -2,9 +2,16 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const generateOAuthURL = (req, res) => {
-  console.log(process.env.LINKEDIN_REDIRECT_URI);
-
   const { platform } = req.params;
+  const { userId } = req.body; // Access the userId from the request body
+  // console.log("Request Body:", req.body);
+
+  // Log the userId to ensure it's passed correctly
+  // console.log("User ID received:", userId);
+  // console.log(process.env.LINKEDIN_REDIRECT_URI);
+  // console.log(process.env.MAILCHIMP_REDIRECT_URI);
+
+  // Continue with your logic for generating the OAuth URL
   let oauthURL = "";
   let clientId = "";
   let redirectUri = "";
@@ -28,7 +35,12 @@ export const generateOAuthURL = (req, res) => {
     case "linkedin":
       clientId = process.env.LINKEDIN_CLIENT_ID;
       redirectUri = process.env.LINKEDIN_REDIRECT_URI;
-      oauthURL = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=rw_ads`;
+      oauthURL = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=rw_ads&state=${userId}`;
+      break;
+    case "mailchimp":
+      clientId = process.env.MAILCHIMP_CLIENT_ID;
+      redirectUri = process.env.MAILCHIMP_REDIRECT_URI;
+      oauthURL = `https://login.mailchimp.com/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${userId}`;
       break;
 
     default:

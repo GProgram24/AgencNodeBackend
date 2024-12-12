@@ -5,6 +5,6 @@ import { generateOAuthURL } from "../../controller/platform/OAuthConfigure.contr
 const router = express.Router();
 
 // Route to get the OAuth URL for the specified platform
-router.get("/:platform", generateOAuthURL);
+router.post("/:platform", generateOAuthURL);
 
 export default router;

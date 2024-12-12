@@ -11,7 +11,7 @@ const platformAccessTokenSchema = new mongoose.Schema(
     platform: {
       type: String,
       required: true,
-      enum: ["linkedin", "facebook", "twitter", "instagram"],
+      enum: ["linkedin", "facebook", "twitter", "instagram", "mailchimp"],
     },
     accessToken: {
       type: String,
@@ -21,6 +21,7 @@ const platformAccessTokenSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
       trim: true,
+      default: null,
     },
     expiresAt: {
       type: Date,
