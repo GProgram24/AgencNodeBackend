@@ -9,6 +9,19 @@ const targetAudienceData = new mongoose.Schema({
   region: { type: String, required: true },
 });
 
+// Sub-schema for Task
+const taskSchema = new mongoose.Schema({
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "ProductService",
+  },
+  productName: { type: String, required: false }, // Optional field
+  targetAudience: { type: targetAudienceData, required: true },
+  brandTone: { type: String, required: true },
+  goal: { type: String, required: true },
+});
+
 const sampleTestingSchema = new mongoose.Schema(
   {
     userId: {
@@ -16,33 +29,11 @@ const sampleTestingSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    task: {
-      type: {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: "ProductService",
-        },
-        productName: { type: String },
-        targetAudience: { 
-          type: targetAudienceData, 
-          required: true 
-        },
-        brandTone:{
-          type: String,
-          required: true
-        },
-        goal:{
-          type: String,
-          required: true,
-        }
-      },
-      required: true,
-    },
-    completed:{
+    task: { type: taskSchema, required: true },
+    completed: {
       type: Boolean,
       required: true,
-      default: false
+      default: false,
     },
   },
   { timestamps: true }
