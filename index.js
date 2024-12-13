@@ -26,6 +26,7 @@ import oauthRoutes from "./router/Platform/OAuthConfigure.route.js";
 import oauthCallbackRoutes from "./router/Platform/OAuthCallback.route.js";
 import masterCopyRoutes from "./router/misc/masterCopy.route.js";
 import { restrictLiteAccountMiddleware } from "./middleware/restrictLiteAccount.middleware.js";
+import brandGuidelinesRoutes from "./router/brandGuidelines.route.js"
 
 dotenv.config();
 
@@ -88,6 +89,7 @@ app.use("/api/sample-testing", sampleTestingTaskRoutes);
 app.patch("/api/onboarding/progress", updateOnboardingProgress);
 app.use("/api/oauth", oauthRoutes);
 app.use("/api", oauthCallbackRoutes);
+app.use("/api/brandGuidelines", brandGuidelinesRoutes)
 // web-socket
 websocketRoutes(io);
 
