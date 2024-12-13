@@ -10,10 +10,10 @@ const router = Router();
 
 router.post(
   "/tasks/assign",
-  restrictLiteAccountMiddleware(),
+  // restrictLiteAccountMiddleware(),
   async (req, res) => {
-    const { brandName } = req.body;
-    const { accountType } = req.user;
+    const { brandName, accountType } = req.body;
+    // const { accountType } = req.body;
 
     if (!brandName) {
       return res.status(400).json({ message: "Brand name is required" });

@@ -24,9 +24,25 @@ const sampleTestingSchema = new mongoose.Schema(
           ref: "ProductService",
         },
         productName: { type: String },
-        targetAudience: [{ type: targetAudienceData, required: true }],
+        targetAudience: { 
+          type: targetAudienceData, 
+          required: true 
+        },
+        brandTone:{
+          type: String,
+          required: true
+        },
+        goal:{
+          type: String,
+          required: true,
+        }
       },
       required: true,
+    },
+    completed:{
+      type: Boolean,
+      required: true,
+      default: false
     },
   },
   { timestamps: true }
